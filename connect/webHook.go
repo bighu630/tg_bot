@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"os"
+	"time"
 	"youtubeMusicBot/config"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -70,8 +71,9 @@ func NewWebHookConnect(whConfig *config.WebHookConfig) *webHookConnect {
 	updater := ext.NewUpdater(dispatcher, nil)
 
 	webHookOpts := &ext.WebhookOpts{
-		ListenAddr:  address,
-		SecretToken: secret,
+		ListenAddr:        address,
+		ReadHeaderTimeout: 30 * time.Second,
+		SecretToken:       secret,
 	}
 
 	if dispatcher != nil && updater != nil {
