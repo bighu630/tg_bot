@@ -10,3 +10,6 @@ token为bot的token
 address为本地监听的ip：端口
 
 domain为tg服务端向你发送请求的域名，注意不要带https前缀，tg会使用https访问，所以这里不要填ip
+
+
+连接tg后直接发送音乐的分享链接就可以
