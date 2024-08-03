@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -84,11 +83,7 @@ func (y *youtubeHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 	for i := 0; i < 3; i++ {
-		_, err = b.SendAudio(ctx.EffectiveChat.Id, gotgbot.InputFileByReader(name, musicReader), &gotgbot.SendAudioOpts{
-			RequestOpts: &gotgbot.RequestOpts{
-				Timeout: 10 * time.Second,
-			},
-		})
+		_, err = b.SendAudio(ctx.EffectiveChat.Id, gotgbot.InputFileByReader(name, musicReader), nil)
 		if err != nil {
 			log.Error().Stack().Err(err).Msg("failed to send audio")
 		} else {
