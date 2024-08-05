@@ -34,14 +34,13 @@ func (y *youtubeHandler) Name() string {
 
 func (y *youtubeHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	msg := ctx.EffectiveMessage.Text
-	if strings.ContainsAny(msg, "music.youtube") {
+	if strings.Contains(msg, "music.youtube") {
 		return true
 	}
 	if len(msg) == 11 {
 		// 使用正则表达式 ^[a-zA-Z0-9]+$ 来匹配只包含字母和数字的字符串
 		regex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
 		return regex.MatchString(msg)
-
 	}
 	return false
 }

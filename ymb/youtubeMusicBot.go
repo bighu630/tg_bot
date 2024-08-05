@@ -14,6 +14,8 @@ func Start() {
 	ymbHandler := handler.NewYoutubeHandler(config.GlobalConfig.Ytdlp.Path)
 	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
 	// tgWebHook.RegisterHandler(handlers.NewMessage(message.Text, echo))
+	gaiHandler := handler.NewGeminiHandler(config.GlobalConfig.Ai)
+	tgWebHook.RegisterHandler(gaiHandler)
 	tgWebHook.RegisterHandler(ymbHandler)
 	tgWebHook.Start()
 }
