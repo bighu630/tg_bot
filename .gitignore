@@ -2,3 +2,4 @@ config.toml
 youtubeMusicBot
 demo/
 .vscode/
+*.log

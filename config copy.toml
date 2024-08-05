@@ -11,3 +11,7 @@ level = 0 # zero log 等级 0是最低
 
 [ytdlp]
 path = "" # default: yt-dlp
+
+[ai]
+geminiKey = ""
+openaiKey = ""

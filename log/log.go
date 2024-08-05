@@ -1,26 +1,51 @@
 package log
 
 import (
+	"fmt"
 	"os"
+	"strings"
+	"time"
 	"youtubeMusicBot/config"
 
+	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-func Init(cfg *config.Log) {
+func Init(cfg config.Log) {
 	if cfg.TimeFormat != "" {
 		zerolog.TimeFieldFormat = cfg.TimeFormat
 	}
+	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+	output.FormatLevel = func(i interface{}) string {
+		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
+	}
+	output.FormatMessage = func(i interface{}) string {
+		return fmt.Sprintf("\t%s\t", i)
+	}
+	output.FormatFieldName = func(i interface{}) string {
+		return fmt.Sprintf("%s:", i)
+	}
+	output.FormatFieldValue = func(i interface{}) string {
+		return strings.ToUpper(fmt.Sprintf("%s", i))
+	}
+
 	zerolog.SetGlobalLevel(zerolog.Level(cfg.Level))
 	if cfg.Path != "" {
-		logFile, err := os.OpenFile(cfg.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to open log file")
+		logFile := &lumberjack.Logger{
+			Filename:   cfg.Path,
+			MaxSize:    10,   // 日志文件最大大小（以MB为单位）
+			MaxBackups: 5,    // 保留的旧日志文件最大数量
+			MaxAge:     30,   // 保留的旧日志文件最长天数
+			Compress:   true, // 是否压缩旧日志文件
 		}
-		defer logFile.Close()
 
+		// 设置多输出：终端和文件
+		multi := zerolog.MultiLevelWriter(zerolog.ConsoleWriter{Out: os.Stdout}, logFile)
 		// 设置日志输出到文件
-		log.Logger = zerolog.New(logFile).With().Timestamp().Logger()
+		log.Logger = log.Output(multi)
+		log.Debug().Msg("start log with file")
+	} else {
+		log.Logger = log.Output(output)
 	}
 }

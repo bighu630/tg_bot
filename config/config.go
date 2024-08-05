@@ -1,8 +1,9 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/BurntSushi/toml"
-	"github.com/rs/zerolog/log"
 )
 
 var GlobalConfig *config
@@ -11,6 +12,7 @@ type config struct {
 	WebHookConfig WebHookConfig `toml:"webHookConfig"`
 	Log           Log           `toml:"log"`
 	Ytdlp         Ytdlp         `toml:"ytdlp"`
+	Ai            Ai            `toml:"ai"`
 }
 
 type WebHookConfig struct {
@@ -30,10 +32,15 @@ type Ytdlp struct {
 	Path string `json:"path" toml:"path"`
 }
 
+type Ai struct {
+	GeminiKey string `json:"geminiKey" toml:"geminiKey"`
+	OpenAiKey string `json:"openAiKey" toml:"openAiKey"`
+}
+
 func init() {
 	GlobalConfig = new(config)
 	if _, err := toml.DecodeFile("config.toml", GlobalConfig); err != nil {
-		log.Error().Stack().Err(err).Msg("failed to decode config.toml")
+		fmt.Println("failed to decode config.toml")
 		return
 	}
 }
