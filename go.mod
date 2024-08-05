@@ -7,6 +7,7 @@ require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.28
 	github.com/google/generative-ai-go v0.17.0
 	github.com/google/uuid v1.6.0
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/rs/zerolog v1.33.0
 	google.golang.org/api v0.186.0
 )
@@ -45,4 +46,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240617180043-68d350f18fd4 // indirect
 	google.golang.org/grpc v1.64.1 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

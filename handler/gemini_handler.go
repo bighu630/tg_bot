@@ -71,14 +71,13 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	s.tokeListMe = append(s.tokeListMe, input)
 	resp, err := g.ai.HandleText(setTake(s))
 	if err != nil {
-		s.tokeListYou = append(s.tokeListYou, "I get something wrong")
+		s.tokeListYou = append(s.tokeListYou, "nop")
+		log.Error().Err(err).Msg("gemini say error")
+		resp = "I get something wrong"
+		err = nil
 	} else {
 		s.tokeListYou = append(s.tokeListYou, resp)
 		log.Debug().Msgf("gemini say: %s", resp)
-	}
-	if err != nil {
-		log.Error().Err(err)
-		return err
 	}
 	_, err = ctx.EffectiveMessage.Reply(b, resp, nil)
 	if err != nil {
