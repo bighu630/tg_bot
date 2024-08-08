@@ -3,6 +3,8 @@ token = ""   # 机器人token
 address = "localhost:8080"  # 服务地址
 domain = ""   # 内网穿透后的外网域名
 secret = ""  # 任意字符串，可留空，由程序自动生成
+certFile=""  # 不使用内网穿透转发一定要配置tls ， tg只接受tls连接
+keyFile=""
 
 [log]
 timeFormat = ""  # 可留空

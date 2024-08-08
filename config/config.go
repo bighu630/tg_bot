@@ -16,10 +16,12 @@ type config struct {
 }
 
 type WebHookConfig struct {
-	Token   string `json:"token" toml:"token"`     // default env: TOKEN
-	Address string `json:"address" toml:"address"` // default env: WEBHOOK_ADDRESS
-	Domain  string `json:"domain" toml:"domain"`   // default env: WEBHOOK_DOMAIN
-	Secret  string `json:"secret" toml:"secret"`   // default env: WEBHOOK_SECRET
+	Token    string `json:"token" toml:"token"`     // default env: TOKEN
+	Address  string `json:"address" toml:"address"` // default env: WEBHOOK_ADDRESS
+	Domain   string `json:"domain" toml:"domain"`   // default env: WEBHOOK_DOMAIN
+	Secret   string `json:"secret" toml:"secret"`   // default env: WEBHOOK_SECRET
+	CertFile string `json:"certFile" toml:"certFile"`
+	KeyFile  string `json:"keyFile" toml:"keyFile"`
 }
 
 type Log struct {

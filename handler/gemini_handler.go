@@ -14,7 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const takeTimeout = 15 * time.Minute
+const takeTimeout = 60 * time.Minute
 
 var _ ext.Handler = (*geminiHandler)(nil)
 
@@ -29,6 +29,7 @@ type takeInfo struct {
 	mu          sync.Mutex
 	tokeListMe  []string
 	tokeListYou []string
+	lastTime    time.Time
 }
 
 func NewGeminiHandler(cfg config.Ai) ext.Handler {
@@ -60,10 +61,31 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
 	sender := ctx.EffectiveSender.Username()
+	if ctx.EffectiveChat.Type == "private" {
+		input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
+		resp, err := g.ai.Chat(sender, input)
+		log.Debug().Msgf("%s say: %s", sender, input)
+		if err != nil {
+			log.Error().Err(err).Msg("gemini chat error")
+			return err
+		}
+		log.Debug().Msgf("gemini say in chat: %s", resp)
+		_, err = ctx.EffectiveMessage.Reply(b, resp, nil)
+		if err != nil {
+			log.Error().Err(err)
+			return err
+		}
+		return nil
+	}
 	if _, ok := g.takeList[sender]; !ok {
-		g.takeList[sender] = &takeInfo{sync.Mutex{}, []string{}, []string{}}
+		g.takeList[sender] = &takeInfo{sync.Mutex{}, []string{}, []string{}, time.Now()}
 	}
 	s := g.takeList[sender]
+	if s.lastTime.Before(time.Now().Add(-takeTimeout)) {
+		s.tokeListMe = []string{}
+		s.tokeListYou = []string{}
+	}
+	s.lastTime = time.Now()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
