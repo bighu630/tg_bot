@@ -74,8 +74,8 @@ func NewWebHookConnect(whConfig *config.WebHookConfig) *webHookConnect {
 		ListenAddr:        address,
 		ReadHeaderTimeout: 30 * time.Second,
 		SecretToken:       secret,
-		CertFile:          "",
-		KeyFile:           "",
+		CertFile:          whConfig.CertFile,
+		KeyFile:           whConfig.KeyFile,
 	}
 
 	if dispatcher != nil && updater != nil {
