@@ -70,12 +70,15 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 			return err
 		}
 		log.Debug().Msgf("gemini say in chat: %s", resp)
-		_, err = ctx.EffectiveMessage.Reply(b, resp, nil)
-		if err != nil {
-			log.Error().Err(err)
-			return err
+		for i := 0; i < 3; i++ {
+			_, err = ctx.EffectiveMessage.Reply(b, resp, nil)
+			if err != nil {
+				log.Error().Err(err)
+			} else {
+				return nil
+			}
 		}
-		return nil
+		return err
 	}
 	if _, ok := g.takeList[sender]; !ok {
 		g.takeList[sender] = &takeInfo{sync.Mutex{}, []string{}, []string{}, time.Now()}

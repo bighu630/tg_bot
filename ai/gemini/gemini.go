@@ -2,6 +2,7 @@ package gemini
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"youtubeMusicBot/ai"
 	"youtubeMusicBot/config"
@@ -53,12 +54,16 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 		cs = model.StartChat()
 		g.chats[chatId] = cs
 	}
-	resp, err := cs.SendMessage(g.ctx, genai.Text(msg))
-	if err != nil {
-		log.Error().Err(err).Msg("failed to send message to gemini")
+	for i := 0; i < 3; i++ {
+		resp, err := cs.SendMessage(g.ctx, genai.Text(msg))
+		if err != nil {
+			log.Error().Err(err).Msg("failed to send message to gemini")
+		} else {
+			result := fmt.Sprint(resp.Candidates[0].Content.Parts[0])
+			return result, nil
+		}
 	}
-	result := fmt.Sprint(resp.Candidates[0].Content.Parts[0])
-	return result, nil
+	return "", errors.New("failed to send message to gemini")
 }
 func (g *gemini) Translate(text string) (string, error) {
 	return "", nil
