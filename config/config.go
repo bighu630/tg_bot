@@ -13,6 +13,7 @@ type config struct {
 	Log           Log           `toml:"log"`
 	Ytdlp         Ytdlp         `toml:"ytdlp"`
 	Ai            Ai            `toml:"ai"`
+	Storage       StorageConfig `toml:"storage"`
 }
 
 type WebHookConfig struct {
@@ -37,6 +38,18 @@ type Ytdlp struct {
 type Ai struct {
 	GeminiKey string `json:"geminiKey" toml:"geminiKey"`
 	OpenAiKey string `json:"openAiKey" toml:"openAiKey"`
+}
+
+// StorageConfig storage config
+type StorageConfig struct {
+	Provider string       `mapstructure:"provider" yaml:"provider" toml:"provider"` // 存储类型
+	SqlDB    *SqlDBConfig `mapstructure:"sqlite" yaml:"sqlite" toml:"sqlite"`       // sqlDB 配置
+}
+
+// SqlDBConfig SqlDB config
+type SqlDBConfig struct {
+	Path string `mapstructure:"path" yaml:"path" toml:"path"` // 存储路径
+	Name string `mapstructure:"name" yaml:"name" toml:"name"` // 数据库名称
 }
 
 func init() {

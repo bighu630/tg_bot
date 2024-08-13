@@ -17,3 +17,10 @@ path = "" # default: yt-dlp
 [ai]
 geminiKey = ""
 openaiKey = ""
+
+[storage]
+provider="sqlite"
+
+[storage.sqlite]
+path = "./data"
+name = "bot.om"
