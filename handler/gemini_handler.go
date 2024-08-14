@@ -71,7 +71,9 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		log.Debug().Msgf("gemini say in chat: %s", resp)
 		for i := 0; i < 3; i++ {
-			_, err = ctx.EffectiveMessage.Reply(b, resp, nil)
+			_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
+				ParseMode: "Markdown",
+			})
 			if err != nil {
 				log.Error().Err(err)
 			} else {
@@ -104,7 +106,9 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		s.tokeListYou = append(s.tokeListYou, resp)
 		log.Debug().Msgf("gemini say: %s", resp)
 	}
-	_, err = ctx.EffectiveMessage.Reply(b, resp, nil)
+	_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
+		ParseMode: "Markdown",
+	})
 	if err != nil {
 		log.Error().Err(err)
 		return err
