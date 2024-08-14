@@ -2,6 +2,9 @@
 ## 功能
 下载youtube music中的音乐连接
 
+！gemini接口！
+chatgpt待续
+
 ## 使用教程
 修改config copy.toml为config.toml
 
