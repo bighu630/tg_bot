@@ -64,6 +64,10 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	if ctx.EffectiveChat.Type == "private" {
 		input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
 		resp, err := g.ai.Chat(sender, input)
+		if len(resp) > 2 {
+			resp = strings.ReplaceAll(resp, "😉", "😊")
+			resp = strings.ReplaceAll(resp, "😄", "😊")
+		}
 		log.Debug().Msgf("%s say: %s", sender, input)
 		if err != nil {
 			log.Error().Err(err).Msg("gemini chat error")
