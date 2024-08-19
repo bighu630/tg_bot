@@ -61,8 +61,13 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
 	sender := ctx.EffectiveSender.Username()
+	_, err := b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
+	if err != nil {
+		return err
+	}
 	if ctx.EffectiveChat.Type == "private" {
 		input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
+
 		resp, err := g.ai.Chat(sender, input)
 		if len(resp) > 2 {
 			resp = strings.ReplaceAll(resp, "😉", "😊")
