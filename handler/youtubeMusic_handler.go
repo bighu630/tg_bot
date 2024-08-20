@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -54,8 +55,21 @@ func (y *youtubeHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	defer func() {
 		os.RemoveAll(uuid)
 	}()
+	a := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-a:
+				return
+			default:
+				b.SendChatAction(ctx.EffectiveChat.Id, "record_voice", nil)
+				time.Sleep(7 * time.Second)
+			}
+		}
+	}()
 	ytdlp := exec.Command(y.ytdlpPath, "-f", "bestvideo[height<=?144]+bestaudio/best", "-x", "--audio-format", "mp3", "-P", uuid, url)
 	err := ytdlp.Run()
+	a <- struct{}{}
 	if err != nil {
 		log.Error().Stack().Err(err)
 		return err
