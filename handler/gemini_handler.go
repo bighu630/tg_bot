@@ -61,21 +61,28 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
 	sender := ctx.EffectiveSender.Username()
-	_, err := b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
-	if err != nil {
-		return err
-	}
+	a := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-a:
+				return
+			default:
+				b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
+				time.Sleep(7 * time.Second)
+			}
+		}
+	}()
 	if ctx.EffectiveChat.Type == "private" {
 		input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
 
 		resp, err := g.ai.Chat(sender, input)
-		if len(resp) > 2 {
-			resp = strings.ReplaceAll(resp, "😉", "😊")
-			resp = strings.ReplaceAll(resp, "😄", "😊")
-		}
+		a <- struct{}{}
+		resp = strings.ReplaceAll(resp, "* **", "- **")
 		log.Debug().Msgf("%s say: %s", sender, input)
 		if err != nil {
 			log.Error().Err(err).Msg("gemini chat error")
+			ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)
 			return err
 		}
 		log.Debug().Msgf("gemini say in chat: %s", resp)
@@ -106,6 +113,8 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msgf("%s say: %s", sender, input)
 	s.tokeListMe = append(s.tokeListMe, input)
 	resp, err := g.ai.HandleText(setTake(s))
+	a <- struct{}{}
+	resp = strings.ReplaceAll(resp, "* **", "- **")
 	if err != nil {
 		s.tokeListYou = append(s.tokeListYou, "nop")
 		log.Error().Err(err).Msg("gemini say error")
