@@ -53,10 +53,13 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 			return !regex.MatchString(ctx.EffectiveMessage.Text)
 		}
 	}
-	if strings.Contains(ctx.EffectiveMessage.Text, "/chat ") {
-		return true
+	msg := ctx.EffectiveMessage.Text
+	for i := range mataMsg {
+		if mataMsg[i] == msg {
+			return false
+		}
 	}
-	return false
+	return strings.Contains(ctx.EffectiveMessage.Text, "/chat ")
 }
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
