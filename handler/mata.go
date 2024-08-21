@@ -52,8 +52,6 @@ func (y *mataHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	return false
 }
 
-// url demo = https://music.youtube.com/watch?v=s87joFadgXg&list=OLAK5uy_kVpwmyOiQxW6pTRUSauQ_Ms1Jbm9jMBLU v eversion
-// we need cat of after list
 func (y *mataHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get mata msg")
 	m, err := y.getOneData()
