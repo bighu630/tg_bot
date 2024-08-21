@@ -71,9 +71,8 @@ func (y *mataHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (y *mataHandler) getOneData() (string, error) {
-	rand.Seed(time.Now().UnixNano())
-	rowCount := 1679
-	randomRow := rand.Intn(rowCount) + 1
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	randomRow := rand.Intn(y.size) + 1
 
 	var id int
 	var data string

@@ -59,7 +59,7 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 			return false
 		}
 	}
-	return strings.Contains(ctx.EffectiveMessage.Text, "/chat ")
+	return strings.HasPrefix(ctx.EffectiveMessage.Text, "/chat ")
 }
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
