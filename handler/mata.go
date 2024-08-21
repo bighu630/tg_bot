@@ -37,6 +37,9 @@ func (y *mataHandler) Name() string {
 }
 
 func (y *mataHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx.EffectiveChat.Type == "private" {
+		return false
+	}
 	if ctx.Message.ReplyToMessage == nil {
 		return false
 	}
