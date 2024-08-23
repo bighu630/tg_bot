@@ -23,7 +23,6 @@ const (
 
 var _ ext.Handler = (*quotationsHandler)(nil)
 
-var mataMsg = []string{"骂她", "骂他", "骂它", "咬他", "咬她", "咬它"}
 var quotationsKey = map[string]string{
 	"骂她": 骂人,
 	"骂他": 骂人,

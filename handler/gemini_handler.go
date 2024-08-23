@@ -54,10 +54,8 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		}
 	}
 	msg := ctx.EffectiveMessage.Text
-	for i := range mataMsg {
-		if mataMsg[i] == msg {
-			return false
-		}
+	if _, ok := quotationsKey[msg]; ok {
+		return false
 	}
 	return strings.HasPrefix(ctx.EffectiveMessage.Text, "/chat ")
 }
