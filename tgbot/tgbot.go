@@ -1,4 +1,4 @@
-package ymb
+package tgbot
 
 import (
 	"fmt"
