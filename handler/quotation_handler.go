@@ -58,8 +58,7 @@ var quotationsKey = map[string]string{
 }
 
 type quotationsHandler struct {
-	db   *sql.DB
-	size int
+	db *sql.DB
 }
 
 func NewQuotationsHandler(dbp string) ext.Handler {
@@ -70,11 +69,7 @@ func NewQuotationsHandler(dbp string) ext.Handler {
 	if err != nil {
 		panic(err)
 	}
-	rowCount, err := getRowCount(db)
-	if err != nil {
-		panic(err)
-	}
-	return &quotationsHandler{db, rowCount + 1}
+	return &quotationsHandler{db}
 }
 
 func (y *quotationsHandler) Name() string {
@@ -148,13 +143,4 @@ func (y *quotationsHandler) getOneData(t string) (string, error) {
 		return "I am fuck gone", nil
 	}
 	return data, err
-}
-
-func getRowCount(db *sql.DB) (int, error) {
-	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM main").Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
 }
