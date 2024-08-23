@@ -42,6 +42,19 @@ var quotationsKey = map[string]string{
 	"神经病":  神经,
 	"有病吧":  神经,
 	"你有病吧": 神经,
+
+	"爱你":   情侣,
+	"mua":  情侣,
+	"mua~": 情侣,
+	"宝":    情侣,
+	"宝儿":   情侣,
+	"宝儿~":  情侣,
+	"摸摸":   情侣,
+	"抱抱":   情侣,
+	"亲亲":   情侣,
+	"摸摸~":  情侣,
+	"抱抱~":  情侣,
+	"亲亲~":  情侣,
 }
 
 type quotationsHandler struct {
@@ -88,8 +101,28 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 	if err != nil {
 		m = "s~b~"
 	} else {
+		replyer := ctx.Message.ReplyToMessage.From.Username
+		if replyer == "" {
+			replyer = ctx.Message.ReplyToMessage.From.FirstName + " " + ctx.Message.ReplyToMessage.From.LastName
+		} else {
+			replyer = "@" + replyer
+		}
 		if quotationsKey[ctx.EffectiveMessage.Text] == 神经 {
-			m = strings.ReplaceAll(m, "<name>", ctx.Message.ReplyToMessage.From.Username)
+			m = strings.ReplaceAll(m, "<name>", replyer)
+		}
+		if quotationsKey[ctx.EffectiveMessage.Text] == 情侣 {
+			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
+				m = replyer + " 单身狗，略略略"
+			} else {
+				u1 := ctx.Message.From.Username
+				if u1 == "" {
+					u1 = ctx.Message.From.FirstName + " " + ctx.Message.From.LastName
+				} else {
+					u1 = "@" + u1
+				}
+				m = strings.ReplaceAll(m, "<name1>", u1)
+				m = strings.ReplaceAll(m, "<name2>", replyer)
+			}
 		}
 	}
 	_, err = b.SendMessage(ctx.Message.Chat.Id, m, &gotgbot.SendMessageOpts{
