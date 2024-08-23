@@ -36,8 +36,10 @@ type Ytdlp struct {
 }
 
 type Ai struct {
-	GeminiKey string `json:"geminiKey" toml:"geminiKey"`
-	OpenAiKey string `json:"openAiKey" toml:"openAiKey"`
+	GeminiKey   string `json:"geminiKey" toml:"geminiKey"`
+	GeminiModel string `json:"geminiModel" toml:"geminiModel"`
+	OpenAiKey   string `json:"openaiKey" toml:"openaiKey"`
+	OpenAiModel string `json:"openaiModel" toml:"openaiModel"`
 }
 
 // StorageConfig storage config

@@ -22,10 +22,10 @@ const (
 var _ ai.AiInterface = (*gemini)(nil)
 
 type gemini struct {
-	client *genai.Client
-	chats  map[string]*genai.ChatSession
-	ctx    context.Context
-	db     storageImpl.Chat
+	model *genai.GenerativeModel
+	chats map[string]*genai.ChatSession
+	ctx   context.Context
+	db    storageImpl.Chat
 }
 
 func NewGemini(cfg config.Ai) *gemini {
@@ -38,7 +38,11 @@ func NewGemini(cfg config.Ai) *gemini {
 	if err != nil {
 		log.Panic().Err(err)
 	}
-	model := client.GenerativeModel("gemini-1.5-flash")
+	modelName := cfg.GeminiModel
+	if modelName == "" {
+		modelName = "gemini-1.5-flash"
+	}
+	model := client.GenerativeModel(modelName)
 	getRole := func(b bool) string {
 		if b {
 			return "user"
@@ -61,7 +65,7 @@ func NewGemini(cfg config.Ai) *gemini {
 		}
 		css[u] = cs
 	}
-	g := &gemini{client, css, ctx, db}
+	g := &gemini{model, css, ctx, db}
 	go g.autoDeleteDB()
 	return g
 }
@@ -72,8 +76,7 @@ func (g gemini) Name() string {
 
 func (g *gemini) HandleText(msg string) (string, error) {
 	input := msg
-	model := g.client.GenerativeModel("gemini-1.5-flash")
-	resp, err := model.GenerateContent(g.ctx,
+	resp, err := g.model.GenerateContent(g.ctx,
 		genai.Text(input))
 	if err != nil {
 		log.Error().Err(err).Msg("could not get response from gemini")
@@ -84,11 +87,10 @@ func (g *gemini) HandleText(msg string) (string, error) {
 }
 
 func (g *gemini) Chat(chatId string, msg string) (string, error) {
-	model := g.client.GenerativeModel("gemini-1.5-flash")
 	var cs *genai.ChatSession
 	var ok bool
 	if cs, ok = g.chats[chatId]; !ok {
-		cs = model.StartChat()
+		cs = g.model.StartChat()
 		g.chats[chatId] = cs
 	}
 	if err := g.db.Add(&models.Chat{0, time.Now(), true, chatId, msg}); err != nil {

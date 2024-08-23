@@ -16,7 +16,9 @@ path = "" # default: yt-dlp
 
 [ai]
 geminiKey = ""
+geminiModel = ""
 openaiKey = ""
+openaiModel = ""
 
 [storage]
 provider="sqlite"

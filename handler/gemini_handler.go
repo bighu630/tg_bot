@@ -63,6 +63,18 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 }
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
+	if ctx.EffectiveChat.Type == "private" {
+		return handlePrivateChat(b, ctx, g.ai)
+	} else {
+		sender := ctx.EffectiveSender.Username()
+		if _, ok := g.takeList[sender]; !ok {
+			g.takeList[sender] = &takeInfo{sync.Mutex{}, []string{}, []string{}, time.Now()}
+		}
+		return handleGroupChat(b, ctx, g.ai, g.takeList[sender])
+	}
+}
+
+func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *takeInfo) error {
 	sender := ctx.EffectiveSender.Username()
 	a := make(chan struct{})
 	go func() {
@@ -76,46 +88,19 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 			}
 		}
 	}()
-	if ctx.EffectiveChat.Type == "private" {
-		input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
 
-		resp, err := g.ai.Chat(sender, input)
-		a <- struct{}{}
-		resp = strings.ReplaceAll(resp, "* **", "- **")
-		log.Debug().Msgf("%s say: %s", sender, input)
-		if err != nil {
-			log.Error().Err(err).Msg("gemini chat error")
-			ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)
-			return err
-		}
-		log.Debug().Msgf("gemini say in chat: %s", resp)
-		for i := 0; i < 3; i++ {
-			_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
-				ParseMode: "Markdown",
-			})
-			if err != nil {
-				log.Error().Err(err)
-			} else {
-				return nil
-			}
-		}
-		return err
-	}
-	if _, ok := g.takeList[sender]; !ok {
-		g.takeList[sender] = &takeInfo{sync.Mutex{}, []string{}, []string{}, time.Now()}
-	}
-	s := g.takeList[sender]
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if s.lastTime.Before(time.Now().Add(-takeTimeout)) {
 		s.tokeListMe = []string{}
 		s.tokeListYou = []string{}
 	}
 	s.lastTime = time.Now()
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
 	log.Debug().Msgf("%s say: %s", sender, input)
 	s.tokeListMe = append(s.tokeListMe, input)
-	resp, err := g.ai.HandleText(setTake(s))
+
+	resp, err := ai.HandleText(setTake(s))
 	a <- struct{}{}
 	resp = strings.ReplaceAll(resp, "* **", "- **")
 	if err != nil {
@@ -135,6 +120,46 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 	return nil
+}
+
+func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) error {
+	sender := ctx.EffectiveSender.Username()
+	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
+
+	a := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-a:
+				return
+			default:
+				b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
+				time.Sleep(7 * time.Second)
+			}
+		}
+	}()
+
+	resp, err := ai.Chat(sender, input)
+	a <- struct{}{}
+	resp = strings.ReplaceAll(resp, "* **", "- **")
+	log.Debug().Msgf("%s say: %s", sender, input)
+	if err != nil {
+		log.Error().Err(err).Msg("gemini chat error")
+		ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)
+		return err
+	}
+	log.Debug().Msgf("gemini say in chat: %s", resp)
+	for i := 0; i < 3; i++ {
+		_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
+			ParseMode: "Markdown",
+		})
+		if err != nil {
+			log.Error().Err(err)
+		} else {
+			return nil
+		}
+	}
+	return err
 }
 
 func setTake(g *takeInfo) string {
