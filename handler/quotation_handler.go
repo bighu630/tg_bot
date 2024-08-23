@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const dbPath = "./quotations.db"
+var dbPath = "./quotations.db"
 
 // quotations 类型
 const (
@@ -49,8 +49,10 @@ type quotationsHandler struct {
 	size int
 }
 
-func NewQuotationsHandler() ext.Handler {
-
+func NewQuotationsHandler(dbp string) ext.Handler {
+	if dbp != "" {
+		dbPath = dbp
+	}
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		panic(err)

@@ -16,7 +16,7 @@ func Start() {
 	ymbHandler := handler.NewYoutubeHandler(config.GlobalConfig.Ytdlp.Path)
 	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
 	gaiHandler := handler.NewGeminiHandler(config.GlobalConfig.Ai)
-	mataHandler := handler.NewQuotationsHandler()
+	mataHandler := handler.NewQuotationsHandler(config.GlobalConfig.Storage.Quotations)
 	tgWebHook.RegisterHandler(gaiHandler)
 	tgWebHook.RegisterHandler(ymbHandler)
 	tgWebHook.RegisterHandler(mataHandler)

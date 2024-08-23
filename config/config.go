@@ -44,8 +44,9 @@ type Ai struct {
 
 // StorageConfig storage config
 type StorageConfig struct {
-	Provider string       `mapstructure:"provider" yaml:"provider" toml:"provider"` // 存储类型
-	SqlDB    *SqlDBConfig `mapstructure:"sqlite" yaml:"sqlite" toml:"sqlite"`       // sqlDB 配置
+	Provider   string       `mapstructure:"provider" yaml:"provider" toml:"provider"` // 存储类型
+	Quotations string       `mapstructure:"quotations" yaml:"quotations" toml:"quotations"`
+	SqlDB      *SqlDBConfig `mapstructure:"sqlite" yaml:"sqlite" toml:"sqlite"` // sqlDB 配置
 }
 
 // SqlDBConfig SqlDB config

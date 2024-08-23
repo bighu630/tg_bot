@@ -22,6 +22,7 @@ openaiModel = ""
 
 [storage]
 provider="sqlite"
+quotations = "./quotations.db"
 
 [storage.sqlite]
 path = "./data"
