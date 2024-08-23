@@ -3,8 +3,8 @@ package storageImpl
 import (
 	"errors"
 	"time"
-	"youtubeMusicBot/storage"
-	"youtubeMusicBot/storage/models"
+	"chatbot/storage"
+	"chatbot/storage/models"
 
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"

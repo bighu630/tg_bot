@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"youtubeMusicBot/ai"
-	"youtubeMusicBot/ai/gemini"
-	"youtubeMusicBot/config"
+	"chatbot/ai"
+	"chatbot/ai/gemini"
+	"chatbot/config"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"

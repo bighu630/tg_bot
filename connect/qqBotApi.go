@@ -1,9 +1,9 @@
 package connect
 
 import (
+	"chatbot/config"
 	"context"
 	"time"
-	"youtubeMusicBot/config"
 
 	bot "github.com/2mf8/Go-QQ-Client"
 	"github.com/2mf8/Go-QQ-Client/dto"

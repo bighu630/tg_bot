@@ -1,13 +1,13 @@
 package storage
 
 import (
+	"chatbot/config"
 	"database/sql"
 	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
-	"youtubeMusicBot/config"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog/log"
