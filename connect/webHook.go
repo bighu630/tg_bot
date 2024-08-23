@@ -1,11 +1,11 @@
 package connect
 
 import (
+	"chatbot/config"
 	"crypto/sha256"
 	"encoding/hex"
 	"os"
 	"time"
-	"youtubeMusicBot/config"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
