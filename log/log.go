@@ -1,11 +1,11 @@
 package log
 
 import (
+	"chatbot/config"
 	"fmt"
 	"os"
 	"strings"
 	"time"
-	"youtubeMusicBot/config"
 
 	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"

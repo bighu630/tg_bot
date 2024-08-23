@@ -1,11 +1,11 @@
 package ymb
 
 import (
+	"chatbot/config"
+	"chatbot/connect"
+	"chatbot/handler"
+	"chatbot/log"
 	"fmt"
-	"youtubeMusicBot/config"
-	"youtubeMusicBot/connect"
-	"youtubeMusicBot/handler"
-	"youtubeMusicBot/log"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
