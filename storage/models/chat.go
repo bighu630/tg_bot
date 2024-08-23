@@ -10,6 +10,15 @@ type Chat struct {
 	Msg      string    `gorm:"column:msg;type:text;not null"`
 }
 
+func NewChat(userName string, isUser bool, msg string) *Chat {
+	return &Chat{
+		Time:     time.Now(),
+		IsUser:   isUser,
+		UserName: userName,
+		Msg:      msg,
+	}
+}
+
 func (Chat) TableName() string {
 	return "chat"
 }

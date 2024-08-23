@@ -1,14 +1,14 @@
 package gemini
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
 	"chatbot/ai"
 	"chatbot/config"
 	"chatbot/storage/models"
 	"chatbot/storage/storageImpl"
+	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/rs/zerolog/log"
@@ -93,7 +93,7 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 		cs = g.model.StartChat()
 		g.chats[chatId] = cs
 	}
-	if err := g.db.Add(&models.Chat{0, time.Now(), true, chatId, msg}); err != nil {
+	if err := g.db.Add(models.NewChat(chatId, true, msg)); err != nil {
 		log.Error().Err(err).Msg("failed to add chat record")
 	}
 	for i := 0; i < 3; i++ {
@@ -102,7 +102,7 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 			log.Error().Err(err).Msg("failed to send message to gemini")
 		} else {
 			result := fmt.Sprint(resp.Candidates[0].Content.Parts[0])
-			if err := g.db.Add(&models.Chat{0, time.Now(), false, chatId, result}); err != nil {
+			if err := g.db.Add(models.NewChat(chatId, false, result)); err != nil {
 				log.Error().Err(err).Msg("failed to add chat record")
 			}
 			return result, nil
@@ -112,7 +112,7 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 		Parts: []genai.Part{genai.Text("I got something wrong. I'll try again.")},
 		Role:  "model",
 	})
-	if err := g.db.Add(&models.Chat{0, time.Now(), false, chatId, "I got something wrong. I'll try again."}); err != nil {
+	if err := g.db.Add(models.NewChat(chatId, false, "I got something wrong. I'll try again.")); err != nil {
 		log.Error().Err(err).Msg("failed to add chat record")
 	}
 	return "", errors.New("failed to send message to gemini")
