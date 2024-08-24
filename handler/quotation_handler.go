@@ -100,20 +100,20 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 		if replyer == "" {
 			replyer = ctx.Message.ReplyToMessage.From.FirstName + " " + ctx.Message.ReplyToMessage.From.LastName
 		} else {
-			replyer = "@" + replyer
+			replyer = " @" + replyer + " "
 		}
 		if quotationsKey[ctx.EffectiveMessage.Text] == 神经 {
 			m = strings.ReplaceAll(m, "<name>", replyer)
 		}
 		if quotationsKey[ctx.EffectiveMessage.Text] == 情侣 {
 			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
-				m = replyer + " 单身狗，略略略"
+				m = " @" + replyer + " " + " 单身狗，略略略"
 			} else {
 				u1 := ctx.Message.From.Username
 				if u1 == "" {
 					u1 = ctx.Message.From.FirstName + " " + ctx.Message.From.LastName
 				} else {
-					u1 = "@" + u1
+					u1 = " @" + u1 + " "
 				}
 				m = strings.ReplaceAll(m, "<name1>", u1)
 				m = strings.ReplaceAll(m, "<name2>", replyer)
