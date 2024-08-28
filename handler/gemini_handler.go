@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"chatbot/ai"
+	"chatbot/ai/gemini"
+	"chatbot/config"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
-	"chatbot/ai"
-	"chatbot/ai/gemini"
-	"chatbot/config"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -57,11 +57,14 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if _, ok := quotationsKey[msg]; ok {
 		return false
 	}
+	if ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
+		return true
+	}
 	return strings.HasPrefix(ctx.EffectiveMessage.Text, "/chat ")
 }
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
-	if ctx.EffectiveChat.Type == "private" {
+	if ctx.EffectiveChat.Type == "private" || ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
 		return handlePrivateChat(b, ctx, g.ai)
 	} else {
 		sender := ctx.EffectiveSender.Username()
