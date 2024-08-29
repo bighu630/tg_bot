@@ -224,6 +224,7 @@ func getRandomProbability(p float64) bool {
 
 func changeText(ctx *ext.Context) {
 	if ctx.Message.ReplyToMessage == nil {
+		ctx.EffectiveMessage.ReplyToMessage = new(gotgbot.Message)
 		if ctx.Message.Sticker != nil {
 			if getRandomProbability(0.5) {
 				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
