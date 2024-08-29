@@ -241,6 +241,7 @@ func changeText(ctx *ext.Context) {
 				ctx.EffectiveMessage.Text = "t"
 			}
 		}
+		return
 	}
 	// 如果是关键词 直接触发
 	msg := ctx.EffectiveMessage.Text
@@ -248,28 +249,31 @@ func changeText(ctx *ext.Context) {
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
 			ctx.EffectiveMessage.Text = "骂ta"
+			return
 		}
 	}
 	for _, i := range 神经病 {
 		if strings.Contains(msg, i) {
 			ctx.EffectiveMessage.Text = "神经"
+			return
 		}
 	}
 	for _, i := range 舔 {
 		if strings.Contains(msg, i) {
 			ctx.EffectiveMessage.Text = "t"
+			return
 		}
 	}
 	for _, i := range cp {
 		if strings.Contains(msg, i) {
 			ctx.EffectiveMessage.Text = "mua"
+			return
 		}
 	}
 	if ctx.Message.Sticker != nil {
 		if getRandomProbability(0.4) {
 			ctx.EffectiveMessage.Text = "mua"
-		}
-		if getRandomProbability(0.3) {
+		} else if getRandomProbability(0.3) {
 			ctx.EffectiveMessage.Text = "神经"
 		} else {
 			ctx.EffectiveMessage.Text = "t"
