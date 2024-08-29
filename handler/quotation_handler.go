@@ -115,6 +115,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
 			crossR = true
+			return true
 		}
 	}
 	for _, i := range 神经病 {
