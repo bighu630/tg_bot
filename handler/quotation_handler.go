@@ -92,7 +92,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return false
 	}
 	msg := ctx.EffectiveMessage.Text
-	if len(msg) >= 7 || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From == &b.User) {
+	if len(msg) >= 21 || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From == &b.User) {
 		return false
 	}
 	if ctx.Message.ReplyToMessage == nil {
@@ -111,30 +111,22 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	// TODO: 如果包含关键词，有概率触发 80%
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
-			if getRandomProbability(0.8) {
-				return true
-			}
+			return true
 		}
 	}
 	for _, i := range 神经病 {
 		if strings.Contains(msg, i) {
-			if getRandomProbability(0.8) {
-				return true
-			}
+			return true
 		}
 	}
 	for _, i := range 舔 {
 		if strings.Contains(msg, i) {
-			if getRandomProbability(0.8) {
-				return true
-			}
+			return true
 		}
 	}
 	for _, i := range cp {
 		if strings.Contains(msg, i) {
-			if getRandomProbability(0.8) {
-				return true
-			}
+			return true
 		}
 	}
 	if ctx.Message.Sticker != nil {
