@@ -29,7 +29,7 @@ var (
 	骂   = []string{"骂她", "骂他", "骂它", "咬他", "咬她", "咬ta", "咬它"}
 	舔   = []string{"舔", "tian"}
 	神经病 = []string{"有病", "神经"}
-	cp  = []string{"爱你", "mua", "宝儿", "摸摸", "抱抱", "亲亲","贴贴"} 
+	cp  = []string{"爱你", "mua", "宝儿", "摸摸", "抱抱", "亲亲","贴贴"}  
 )
 
 var quotationsKey = map[string]string{
@@ -63,7 +63,7 @@ var quotationsKey = map[string]string{
 	"摸摸":   情侣,
 	"抱抱":   情侣,
 	"亲亲":   情侣,
-	"贴贴":  情侣 , 
+	"贴贴":  情侣 ,  
 	"摸摸~":  情侣,
 	"抱抱~":  情侣,
 	"亲亲~":  情侣,
@@ -108,7 +108,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 				crossR = true
 			}
 		}
-		crossR = false
+		return false
 	}
 	// 如果是关键词 直接触发
 	for _, i := range 骂 {
