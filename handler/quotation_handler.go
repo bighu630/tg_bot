@@ -97,52 +97,56 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if len(msg) >= 21 || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From == &b.User) {
 		return false
 	}
+	crossR := false
 	if ctx.Message.ReplyToMessage == nil {
 		if ctx.Message.Sticker != nil {
 			if getRandomProbability(0.04) {
-				return true
+				crossR = true
 			}
 		} else {
 			if getRandomProbability(0.02) {
-				return true
+				crossR = true
 			}
 		}
-		return false
+		crossR = true
 	}
 	// 如果是关键词 直接触发
 	// TODO: 如果包含关键词，有概率触发 80%
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
-			return true
+			crossR = true
 		}
 	}
 	for _, i := range 神经病 {
 		if strings.Contains(msg, i) {
-			return true
+			crossR = true
 		}
 	}
 	for _, i := range 舔 {
 		if strings.Contains(msg, i) {
-			return true
+			crossR = true
 		}
 	}
 	for _, i := range cp {
 		if strings.Contains(msg, i) {
-			return true
+			crossR = true
 		}
 	}
 	if ctx.Message.Sticker != nil {
 		if getRandomProbability(0.1) {
-			return true
+			crossR = true
 		}
 	} else {
 		if getRandomProbability(0.05) {
-			return true
+			crossR = true
 		}
 	}
 
 	if _, ok := quotationsKey[msg]; ok {
-		return true
+		crossR = true
+	}
+	if crossR {
+		return getRandomProbability(0.4)
 	}
 	return false
 }
