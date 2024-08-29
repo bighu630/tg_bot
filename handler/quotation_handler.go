@@ -135,11 +135,11 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		}
 	}
 	if ctx.Message.Sticker != nil {
-		if getRandomProbability(0.35) {
+		if getRandomProbability(0.1) {
 			return true
 		}
 	} else {
-		if getRandomProbability(0.1) {
+		if getRandomProbability(0.05) {
 			return true
 		}
 	}
