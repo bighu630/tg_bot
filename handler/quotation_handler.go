@@ -108,7 +108,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 				crossR = true
 			}
 		}
-		crossR = true
+		crossR = false
 	}
 	// 如果是关键词 直接触发
 	for _, i := range 骂 {
