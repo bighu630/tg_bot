@@ -3,10 +3,12 @@ package handler
 import (
 	"database/sql"
 	"strings"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/rand"
 )
 
 var dbPath = "./quotations.db"
@@ -23,13 +25,22 @@ const (
 
 var _ ext.Handler = (*quotationsHandler)(nil)
 
+var (
+	骂   = []string{"骂她", "骂他", "骂它", "咬他", "咬她", "咬ta", "咬它"}
+	舔   = []string{"舔", "tian"}
+	神经病 = []string{"有病", "神经"}
+	cp  = []string{"爱你", "mua", "宝儿", "摸摸", "抱抱", "亲亲"}
+)
+
 var quotationsKey = map[string]string{
-	"骂她": 骂人,
-	"骂他": 骂人,
-	"骂它": 骂人,
-	"咬他": 骂人,
-	"咬它": 骂人,
-	"咬她": 骂人,
+	"骂她":  骂人,
+	"骂他":  骂人,
+	"骂它":  骂人,
+	"骂ta": 骂人,
+	"咬他":  骂人,
+	"咬它":  骂人,
+	"咬她":  骂人,
+	"咬ta": 骂人,
 
 	"舔ta":  舔狗,
 	"舔":    舔狗,
@@ -81,9 +92,58 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return false
 	}
 	if ctx.Message.ReplyToMessage == nil {
+		if ctx.Message.Sticker != nil {
+			if getRandomProbability(0.04) {
+				return true
+			}
+		} else {
+			if getRandomProbability(0.02) {
+				return true
+			}
+		}
 		return false
 	}
+	// 如果是关键词 直接触发
 	msg := ctx.EffectiveMessage.Text
+	// TODO: 如果包含关键词，有概率触发 80%
+	for _, i := range 骂 {
+		if strings.Contains(msg, i) {
+			if getRandomProbability(0.8) {
+				return true
+			}
+		}
+	}
+	for _, i := range 神经病 {
+		if strings.Contains(msg, i) {
+			if getRandomProbability(0.8) {
+				return true
+			}
+		}
+	}
+	for _, i := range 舔 {
+		if strings.Contains(msg, i) {
+			if getRandomProbability(0.8) {
+				return true
+			}
+		}
+	}
+	for _, i := range cp {
+		if strings.Contains(msg, i) {
+			if getRandomProbability(0.8) {
+				return true
+			}
+		}
+	}
+	if ctx.Message.Sticker != nil {
+		if getRandomProbability(0.35) {
+			return true
+		}
+	} else {
+		if getRandomProbability(0.1) {
+			return true
+		}
+	}
+
 	if _, ok := quotationsKey[msg]; ok {
 		return true
 	}
@@ -92,6 +152,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 
 func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get quotations msg")
+	changeText(ctx)
 	m, err := y.getOneData(quotationsKey[ctx.EffectiveMessage.Text])
 	if err != nil {
 		m = "s~b~"
@@ -107,7 +168,7 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 		}
 		if quotationsKey[ctx.EffectiveMessage.Text] == 情侣 {
 			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
-				m = " @" + replyer + " " + " 单身狗，略略略"
+				m = replyer + " " + " 单身狗，略略略"
 			} else {
 				u1 := ctx.Message.From.Username
 				if u1 == "" {
@@ -143,4 +204,78 @@ func (y *quotationsHandler) getOneData(t string) (string, error) {
 		return "I am fuck gone", nil
 	}
 	return data, err
+}
+
+func getRandomProbability(p float64) bool {
+	q := int(p * 1000)
+	if q >= 1000 {
+		return true
+	}
+	if q < 1 {
+		return false
+	}
+	rand.Seed(uint64(time.Now().UnixNano())) // 初始化随机数种子
+	randomNumber := rand.Intn(1001)
+	return randomNumber <= q
+}
+
+func changeText(ctx *ext.Context) {
+	if ctx.Message.ReplyToMessage == nil {
+		if ctx.Message.Sticker != nil {
+			if getRandomProbability(0.5) {
+				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
+				ctx.EffectiveMessage.Text = "神经"
+			} else {
+				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
+				ctx.EffectiveMessage.Text = "t"
+			}
+		} else {
+			if getRandomProbability(0.5) {
+				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
+				ctx.EffectiveMessage.Text = "神经"
+			} else {
+				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
+				ctx.EffectiveMessage.Text = "t"
+			}
+		}
+	}
+	// 如果是关键词 直接触发
+	msg := ctx.EffectiveMessage.Text
+	// TODO: 如果包含关键词，有概率触发 80%
+	for _, i := range 骂 {
+		if strings.Contains(msg, i) {
+			ctx.EffectiveMessage.Text = "骂ta"
+		}
+	}
+	for _, i := range 神经病 {
+		if strings.Contains(msg, i) {
+			ctx.EffectiveMessage.Text = "神经"
+		}
+	}
+	for _, i := range 舔 {
+		if strings.Contains(msg, i) {
+			ctx.EffectiveMessage.Text = "t"
+		}
+	}
+	for _, i := range cp {
+		if strings.Contains(msg, i) {
+			ctx.EffectiveMessage.Text = "mua"
+		}
+	}
+	if ctx.Message.Sticker != nil {
+		if getRandomProbability(0.4) {
+			ctx.EffectiveMessage.Text = "mua"
+		}
+		if getRandomProbability(0.3) {
+			ctx.EffectiveMessage.Text = "神经"
+		} else {
+			ctx.EffectiveMessage.Text = "t"
+		}
+	} else {
+		if getRandomProbability(0.5) {
+			ctx.EffectiveMessage.Text = "神经"
+		} else {
+			ctx.EffectiveMessage.Text = "t"
+		}
+	}
 }

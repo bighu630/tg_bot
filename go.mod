@@ -10,6 +10,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/rs/zerolog v1.33.0
+	golang.org/x/exp v0.0.0-20190121172915-509febef88a4
 	google.golang.org/api v0.186.0
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.11
