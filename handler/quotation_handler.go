@@ -1,14 +1,14 @@
 package handler
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"math/big"
 	"strings"
-	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/rand"
 )
 
 var dbPath = "./quotations.db"
@@ -208,16 +208,18 @@ func (y *quotationsHandler) getOneData(t string) (string, error) {
 }
 
 func getRandomProbability(p float64) bool {
-	q := int(p * 1000)
+	q := int64(p * 1000)
 	if q >= 1000 {
 		return true
 	}
 	if q < 1 {
 		return false
 	}
-	rand.Seed(uint64(time.Now().UnixNano())) // 初始化随机数种子
-	randomNumber := rand.Intn(1001)
-	return randomNumber <= q
+	rNum, err := rand.Int(rand.Reader, big.NewInt(1001))
+	if err != nil {
+		return false
+	}
+	return rNum.Int64() <= q
 }
 
 func changeText(ctx *ext.Context) {
