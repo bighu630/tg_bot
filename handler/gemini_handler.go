@@ -57,7 +57,7 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if _, ok := quotationsKey[msg]; ok {
 		return false
 	}
-	if ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
+	if ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
 		return true
 	}
 	return strings.HasPrefix(ctx.EffectiveMessage.Text, "/chat ")

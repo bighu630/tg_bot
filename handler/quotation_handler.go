@@ -92,7 +92,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return false
 	}
 	msg := ctx.EffectiveMessage.Text
-	if len(msg) >= 7 || ctx.EffectiveMessage.ReplyToMessage.From == &b.User {
+	if len(msg) >= 7 || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From == &b.User) {
 		return false
 	}
 	if ctx.Message.ReplyToMessage == nil {
