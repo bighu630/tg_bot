@@ -33,7 +33,7 @@ jobs:
       run: |
         echo "${SSH_PRIVATE_KEY}" > private_key
         chmod 600 private_key
-        scp -i private_key -o StrictHostKeyChecking=no myapp ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}
+        scp -i private_key -o StrictHostKeyChecking=no chatbot ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}
 
     - name: Restart the service on the server
       env:
