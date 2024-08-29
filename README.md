@@ -1,13 +1,14 @@
-# youtube music bot
+# tg bot
 
 ## 功能
 
 下载youtube music中的音乐连接
 
-！gemini接口！
+与gemini对话
 
 与群友交互
-chatgpt待续
+
+chatgpt待续...
 
 ## 使用教程
 
