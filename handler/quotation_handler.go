@@ -91,6 +91,10 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.EffectiveChat.Type == "private" {
 		return false
 	}
+	msg := ctx.EffectiveMessage.Text
+	if len(msg) >= 7 {
+		return false
+	}
 	if ctx.Message.ReplyToMessage == nil {
 		if ctx.Message.Sticker != nil {
 			if getRandomProbability(0.04) {
@@ -104,7 +108,6 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return false
 	}
 	// 如果是关键词 直接触发
-	msg := ctx.EffectiveMessage.Text
 	// TODO: 如果包含关键词，有概率触发 80%
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
