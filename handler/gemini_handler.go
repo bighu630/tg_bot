@@ -104,6 +104,7 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	resp, err := ai.HandleText(setTake(s))
 	a <- struct{}{}
 	resp = strings.ReplaceAll(resp, "* **", "- **")
+	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
 	if err != nil {
 		s.tokeListYou = append(s.tokeListYou, "nop")
 		log.Error().Err(err).Msg("gemini say error")
@@ -143,6 +144,7 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 	resp, err := ai.Chat(sender, input)
 	a <- struct{}{}
 	resp = strings.ReplaceAll(resp, "* **", "- **")
+	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
 	log.Debug().Msgf("%s say: %s", sender, input)
 	if err != nil {
 		log.Error().Err(err).Msg("gemini chat error")
