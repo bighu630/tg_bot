@@ -19,6 +19,7 @@ type autoCallerConnect struct {
 	updater    *ext.Updater
 	token      string
 	cmdMap     map[string]func(*gotgbot.Bot, int64)
+	startAble  bool
 }
 
 func NewAutoCaller(whConfig *config.WebHookConfig) *autoCallerConnect {
@@ -76,6 +77,7 @@ func NewAutoCaller(whConfig *config.WebHookConfig) *autoCallerConnect {
 
 // TODO: 考虑多种类型的注册
 func (a *autoCallerConnect) RegisterHandler(handler func(*gotgbot.Bot, int64), cmd string, successBack string) {
+	a.startAble = true
 	if _, ok := a.cmdMap[cmd]; cmd != "" && ok {
 		log.Error().Msg("this cmd has register,we will not add it again")
 		return
@@ -98,6 +100,9 @@ func (a *autoCallerConnect) RegisterHandler(handler func(*gotgbot.Bot, int64), c
 }
 
 func (a *autoCallerConnect) Start() {
+	if !a.startAble {
+		return
+	}
 	// 开始轮询更新
 	err := a.updater.StartPolling(a.bot, &ext.PollingOpts{})
 	if err != nil {
