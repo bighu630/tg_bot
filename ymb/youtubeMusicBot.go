@@ -13,13 +13,18 @@ import (
 
 func Start() {
 	log.Init(config.GlobalConfig.Log)
-	ymbHandler := handler.NewYoutubeHandler(config.GlobalConfig.Ytdlp.Path)
 	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
+	tgAutoCall := connect.NewAutoCaller(&config.GlobalConfig.WebHookConfig)
+
+	ymbHandler := handler.NewYoutubeHandler(config.GlobalConfig.Ytdlp.Path)
 	gaiHandler := handler.NewGeminiHandler(config.GlobalConfig.Ai)
 	mataHandler := handler.NewQuotationsHandler(config.GlobalConfig.Storage.Quotations)
+
 	tgWebHook.RegisterHandler(gaiHandler)
 	tgWebHook.RegisterHandler(ymbHandler)
 	tgWebHook.RegisterHandler(mataHandler)
+
+	tgAutoCall.Start()
 	tgWebHook.Start()
 }
 
