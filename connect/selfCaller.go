@@ -76,16 +76,25 @@ func NewAutoCaller(whConfig *config.WebHookConfig) *autoCallerConnect {
 
 // TODO: 考虑多种类型的注册
 func (a *autoCallerConnect) RegisterHandler(handler func(*gotgbot.Bot, int64), cmd string, successBack string) {
-	if _, ok := a.cmdMap[cmd]; ok {
+	if _, ok := a.cmdMap[cmd]; cmd != "" && ok {
 		log.Error().Msg("this cmd has register,we will not add it again")
 		return
 	}
-	a.cmdMap[cmd] = handler
-	a.dispatcher.AddHandler(handlers.NewCommand(cmd, func(b *gotgbot.Bot, ctx *ext.Context) error {
-		ctx.EffectiveChat.SendMessage(b, successBack, nil)
-		go a.cmdMap[cmd](b, ctx.EffectiveChat.Id)
-		return nil
-	}))
+	if cmd != "" {
+		a.cmdMap[cmd] = handler
+		a.dispatcher.AddHandler(handlers.NewCommand(cmd, func(b *gotgbot.Bot, ctx *ext.Context) error {
+			ctx.EffectiveChat.SendMessage(b, successBack, nil)
+			go a.cmdMap[cmd](b, ctx.EffectiveChat.Id)
+			return nil
+		}))
+	} else {
+		a.dispatcher.AddHandler(handlers.NewMessage(nil, func(b *gotgbot.Bot, ctx *ext.Context) error {
+			// 将群组的 chatId 保存下来
+			chatId := ctx.EffectiveChat.Id
+			go handler(b, chatId)
+			return nil
+		}))
+	}
 }
 
 func (a *autoCallerConnect) Start() {
