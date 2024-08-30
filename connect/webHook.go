@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
@@ -86,6 +87,10 @@ func NewWebHookConnect(whConfig *config.WebHookConfig) *webHookConnect {
 
 func (w *webHookConnect) RegisterHandler(handler ext.Handler) {
 	w.dispatcher.AddHandler(handler)
+}
+
+func (w *webHookConnect) RegisterHandlerWithCmd(handler handlers.Response, cmd string) {
+	w.dispatcher.AddHandler(handlers.NewCommand(cmd, handler))
 }
 
 func (w *webHookConnect) Start() {
