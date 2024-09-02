@@ -98,47 +98,11 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return false
 	}
 	crossR := false
-	if ctx.Message.ReplyToMessage == nil {
-		if ctx.Message.Sticker != nil {
-			if getRandomProbability(0.04) {
-				crossR = true
-			}
-		} else {
-			if getRandomProbability(0.02) {
-				crossR = true
-			}
-		}
-		return false
-	}
 	// 如果是关键词 直接触发
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
 			crossR = true
 			return true
-		}
-	}
-	for _, i := range 神经病 {
-		if strings.Contains(msg, i) {
-			crossR = true
-		}
-	}
-	for _, i := range 舔 {
-		if strings.Contains(msg, i) {
-			crossR = true
-		}
-	}
-	for _, i := range cp {
-		if strings.Contains(msg, i) {
-			crossR = true
-		}
-	}
-	if ctx.Message.Sticker != nil {
-		if getRandomProbability(0.1) {
-			crossR = true
-		}
-	} else {
-		if getRandomProbability(0.05) {
-			crossR = true
 		}
 	}
 
