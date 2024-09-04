@@ -64,7 +64,7 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 }
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
-	if ctx.EffectiveChat.Type == "private" || ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
+	if ctx.EffectiveChat.Type == "private" || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username) {
 		return handlePrivateChat(b, ctx, g.ai)
 	} else {
 		sender := ctx.EffectiveSender.Username()
