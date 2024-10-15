@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"chatbot/dao"
 	"crypto/rand"
 	"database/sql"
 	"math/big"
@@ -74,15 +75,8 @@ type quotationsHandler struct {
 	db *sql.DB
 }
 
-func NewQuotationsHandler(dbp string) ext.Handler {
-	if dbp != "" {
-		dbPath = dbp
-	}
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		panic(err)
-	}
-	return &quotationsHandler{db}
+func NewQuotationsHandler() ext.Handler {
+	return &quotationsHandler{dao.GetDB()}
 }
 
 func (y *quotationsHandler) Name() string {

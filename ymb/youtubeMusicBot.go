@@ -3,6 +3,7 @@ package ymb
 import (
 	"chatbot/config"
 	"chatbot/connect"
+	"chatbot/dao"
 	"chatbot/handler"
 	"chatbot/log"
 	"chatbot/timekeeping"
@@ -14,21 +15,21 @@ import (
 
 func Start() {
 	log.Init(config.GlobalConfig.Log)
+	dao.DbPath = config.GlobalConfig.Storage.SqlDB.Path
 	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
 	// tgAutoCall := connect.NewAutoCaller(&config.GlobalConfig.WebHookConfig)
 
 	ymbHandler := handler.NewYoutubeHandler(config.GlobalConfig.Ytdlp.Path)
 	gaiHandler := handler.NewGeminiHandler(config.GlobalConfig.Ai)
-	mataHandler := handler.NewQuotationsHandler(config.GlobalConfig.Storage.Quotations)
+	mataHandler := handler.NewQuotationsHandler()
 
 	timer := timekeeping.NewTimekeeper()
-	timer.StartTimer() // 在new的时候就可以开始了
 
 	tgWebHook.RegisterHandler(gaiHandler)
 	tgWebHook.RegisterHandler(ymbHandler)
 	tgWebHook.RegisterHandler(mataHandler)
-	tgWebHook.RegisterHandlerWithCmd(timer.NewStartKFCCmd(), "startkfc")
-	tgWebHook.RegisterHandlerWithCmd(timer.NewStopKFCCmd(), "stopkfc")
+	timer.RegisterCmd(tgWebHook.RegisterHandlerWithCmd)
+	timer.Start()
 
 	// tgAutoCall.Start()
 	tgWebHook.Start()
