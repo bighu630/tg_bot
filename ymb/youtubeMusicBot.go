@@ -15,7 +15,7 @@ import (
 
 func Start() {
 	log.Init(config.GlobalConfig.Log)
-	dao.DbPath = config.GlobalConfig.Storage.Quotations
+	dao.Init(config.GlobalConfig.Storage.Quotations)
 	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
 	// tgAutoCall := connect.NewAutoCaller(&config.GlobalConfig.WebHookConfig)
 

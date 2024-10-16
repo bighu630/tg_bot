@@ -6,12 +6,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DbPath = "./quotations.db"
+const DbPath = "./quotations.db"
 
 var db *sql.DB
 
-func init() {
-	ldb, err := sql.Open("sqlite3", DbPath)
+func Init(path string) {
+	if path == "" {
+		path = DbPath
+	}
+	ldb, err := sql.Open("sqlite3", path)
 	if err != nil {
 		panic(err)
 	}
