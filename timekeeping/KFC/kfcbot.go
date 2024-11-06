@@ -11,7 +11,6 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
 )
 
 const (
@@ -25,7 +24,7 @@ type kfcTimer struct {
 	sender    map[int64]*kfcSender
 }
 
-func NewKFC(db *gorm.DB) *kfcTimer {
+func NewKFC() *kfcTimer {
 	q, err := storageImpl.InitQuotations()
 	if err != nil {
 		log.Error().Err(err)
