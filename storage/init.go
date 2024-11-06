@@ -40,6 +40,9 @@ const (
 )
 
 func InitDB() *gorm.DB {
+	if db := DB; db != nil {
+		return db
+	}
 	DBConfig = &config.GlobalConfig.Storage
 	var gormDB *gorm.DB
 	var err error

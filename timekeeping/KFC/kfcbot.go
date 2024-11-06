@@ -1,7 +1,7 @@
 package kfc
 
 import (
-	"database/sql"
+	"chatbot/storage/storageImpl"
 	"sync"
 	"time"
 
@@ -11,24 +11,30 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 const (
-	KFCKEY = "KFC"
+	KFCKEY = "kfc"
 )
 
 type kfcTimer struct {
-	mu     sync.Mutex
-	db     *sql.DB
-	tgBot  map[int64]*gotgbot.Bot
-	sender map[int64]*kfcSender
+	mu        sync.Mutex
+	quotation storageImpl.Quotations
+	tgBot     map[int64]*gotgbot.Bot
+	sender    map[int64]*kfcSender
 }
 
-func NewKFC(db *sql.DB) *kfcTimer {
+func NewKFC(db *gorm.DB) *kfcTimer {
+	q, err := storageImpl.InitQuotations()
+	if err != nil {
+		log.Error().Err(err)
+		return nil
+	}
 	return &kfcTimer{
-		db:     db,
-		tgBot:  make(map[int64]*gotgbot.Bot),
-		sender: make(map[int64]*kfcSender),
+		quotation: q,
+		tgBot:     make(map[int64]*gotgbot.Bot),
+		sender:    make(map[int64]*kfcSender),
 	}
 }
 
@@ -37,7 +43,7 @@ func (k *kfcTimer) newStartCmd() handlers.Response {
 		k.mu.Lock()
 		defer k.mu.Unlock()
 		k.tgBot[ctx.EffectiveChat.Id] = b
-		sender := newKfcSender(k.db, b, ctx.EffectiveChat.Id)
+		sender := newKfcSender(k.quotation, b, ctx.EffectiveChat.Id)
 		if _, ok := k.sender[ctx.EffectiveChat.Id]; ok {
 			log.Debug().Msg("this cat had add kfs timer")
 			_, err := b.SendMessage(ctx.EffectiveChat.Id, "kfc bot had add", nil)
@@ -85,15 +91,14 @@ func (k *kfcTimer) Register(reg func(handler handlers.Response, cmd string)) {
 type kfcSender struct {
 	bot    *gotgbot.Bot
 	chatID int64
-	db     *sql.DB
+	qutedb storageImpl.Quotations
 	stop   chan (struct{})
 }
 
-func newKfcSender(db *sql.DB, b *gotgbot.Bot, chatID int64) *kfcSender {
-
+func newKfcSender(qute storageImpl.Quotations, b *gotgbot.Bot, chatID int64) *kfcSender {
 	return &kfcSender{
 		bot:    b,
-		db:     db,
+		qutedb: qute,
 		chatID: chatID,
 		stop:   make(chan struct{}, 1),
 	}
@@ -122,11 +127,13 @@ func (k *kfcSender) start() {
 		// 计算到随机时间的延迟
 		delay := time.Until(randomTime)
 
-		// 等待到随机时间
-		time.Sleep(delay)
 		select {
 		case <-time.After(delay):
-			kfc := k.getKFCLine()
+			kfc, err := k.qutedb.GetRandomOne(KFCKEY)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to get kfc quotation")
+				kfc = "VME5o"
+			}
 			k.bot.SendMessage(k.chatID, kfc, nil)
 			select {
 			case <-time.After(24 * time.Hour):
@@ -143,17 +150,4 @@ func (k *kfcSender) start() {
 
 func (k *kfcSender) Stop() {
 	k.stop <- struct{}{}
-}
-
-func (k *kfcSender) getKFCLine() string {
-	var id int
-	var data string
-	var level string
-	// 获取随机行
-	err := k.db.QueryRow("SELECT * FROM main WHERE level = ? ORDER BY RANDOM() LIMIT 1", "kfc").Scan(&id, &data, &level)
-	if err != nil || level != "kfc" {
-		return "KFC!!!!"
-	}
-	return data
-
 }
