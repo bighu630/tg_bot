@@ -39,7 +39,7 @@ func InitQuotations() (Quotations, error) {
 
 func (q quotations) GetRandomOne(t string) (string, error) {
 	r := models.Quotation{}
-	if err := q.db.Where("type = ?", t).Order("RANDOM()").First(&r).Error; err != nil {
+	if err := q.db.Where("level = ?", t).Order("RANDOM()").First(&r).Error; err != nil {
 		log.Error().Err(err).Msg("failed to get quotation")
 		return "", err
 	}
