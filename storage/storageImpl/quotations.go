@@ -1,6 +1,7 @@
 package storageImpl
 
 import (
+	"chatbot/config"
 	"chatbot/storage"
 	"chatbot/storage/models"
 	"errors"
@@ -23,7 +24,7 @@ func InitQuotations() (Quotations, error) {
 	if qute != nil {
 		return qute, nil
 	}
-	db := storage.InitDB()
+	db := storage.InitWithConfig(config.SqlDBConfig{Name: "quotations.db", Path: "./data"})
 	if db == nil {
 		log.Error().Msg("failed to init database")
 		return nil, errors.New("failed to init database")

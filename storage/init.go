@@ -38,6 +38,22 @@ const (
 	retryDelayMax = 30 * time.Second
 )
 
+func InitWithConfig(cfg config.SqlDBConfig) *gorm.DB {
+	var gormDB *gorm.DB
+	var err error
+	switch DBConfig.Provider {
+	case "sqlite":
+		gormDB, err = ConnectDB(DefaultDriveName, &cfg)
+		if err != nil {
+			panic(fmt.Sprintf("connect database failed:%v", err))
+		}
+		log.Info().Msg("connect database success")
+	default:
+		panic("not supported database type, please check your configuration")
+	}
+	return gormDB
+}
+
 func InitDB() *gorm.DB {
 	if db := DB; db != nil {
 		return db
