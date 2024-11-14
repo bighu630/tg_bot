@@ -10,6 +10,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/rs/zerolog v1.33.0
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/asr v1.0.1038
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1038
 	google.golang.org/api v0.186.0
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.11

@@ -4,6 +4,7 @@ import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
 	"chatbot/config"
+	"chatbot/utils"
 	"regexp"
 	"strings"
 	"sync"
@@ -65,6 +66,9 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
 	if ctx.EffectiveChat.Type == "private" || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username) {
+		if ctx.EffectiveMessage.Audio != nil {
+			return handleAudio(ctx.EffectiveMessage.Audio, b, ctx)
+		}
 		return handlePrivateChat(b, ctx, g.ai)
 	} else {
 		sender := ctx.EffectiveSender.Username()
@@ -142,27 +146,41 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 	}()
 
 	resp, err := ai.Chat(sender, input)
-	a <- struct{}{}
-	resp = strings.ReplaceAll(resp, "* **", "- **")
-	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
-	log.Debug().Msgf("%s say: %s", sender, input)
 	if err != nil {
 		log.Error().Err(err).Msg("gemini chat error")
 		ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)
 		return err
 	}
+	log.Debug().Msgf("%s say: %s", sender, input)
+	a <- struct{}{}
+	return sendRespond(resp, b, ctx)
+}
+
+func handleAudio(a *gotgbot.Audio, b *gotgbot.Bot, ctx *ext.Context) error {
+	utils.DownloadFileByFileID(a.FileId, b)
+	return nil
+}
+
+func downloadFileByFileID(fileID string, b *gotgbot.Bot) {
+
+}
+
+func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
+	resp = strings.ReplaceAll(resp, "* **", "- **")
+	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
 	log.Debug().Msgf("gemini say in chat: %s", resp)
 	for i := 0; i < 3; i++ {
-		_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
+		_, err := ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
 			ParseMode: "Markdown",
 		})
 		if err != nil {
 			log.Error().Err(err)
+			return err
 		} else {
 			return nil
 		}
 	}
-	return err
+	return nil
 }
 
 func setTake(g *takeInfo) string {
