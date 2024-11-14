@@ -44,5 +44,5 @@ func (q quotations) GetRandomOne(t string) (string, error) {
 		log.Error().Err(err).Msg("failed to get quotation")
 		return "", err
 	}
-	return r.Data, nil
+	return r.Text, nil
 }
