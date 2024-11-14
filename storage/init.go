@@ -23,7 +23,6 @@ var (
 
 const (
 	DefaultDriveName       = "sqlite3"
-	DefaultSourceName      = "om.db"
 	DefaultConnMaxIdleTime = 15 * time.Minute
 	DefaultConnMaxLifetime = 1 * time.Hour
 	DefaultMaxIdleConns    = 10

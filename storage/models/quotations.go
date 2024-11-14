@@ -7,5 +7,5 @@ type Quotation struct {
 }
 
 func (Quotation) TableName() string {
-	return "quotation"
+	return "main"
 }
