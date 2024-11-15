@@ -1,5 +1,5 @@
 [webHookConfig]
-token = ""   # 机器人token
+token = "7618732993:AAFZ5wPteVzRI4Ne6MEMCGHSWr0K7sRheGw"   # 机器人token
 address = "localhost:8080"  # 服务地址
 domain = ""   # 内网穿透后的外网域名
 secret = ""  # 任意字符串，可留空，由程序自动生成

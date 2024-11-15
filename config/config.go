@@ -14,6 +14,7 @@ type config struct {
 	Ytdlp         Ytdlp         `toml:"ytdlp"`
 	Ai            Ai            `toml:"ai"`
 	Storage       StorageConfig `toml:"storage"`
+	TencentConfig TencentConfig `toml:"tencent"`
 }
 
 type WebHookConfig struct {
@@ -23,6 +24,11 @@ type WebHookConfig struct {
 	Secret   string `json:"secret" toml:"secret"`   // default env: WEBHOOK_SECRET
 	CertFile string `json:"certFile" toml:"certFile"`
 	KeyFile  string `json:"keyFile" toml:"keyFile"`
+}
+
+type TencentConfig struct {
+	SecretID  string `json:"secretID" toml:"secretID"`
+	SecretKey string `json:"secretKey" toml:"secretKey"`
 }
 
 type Log struct {
