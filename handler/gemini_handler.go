@@ -3,9 +3,7 @@ package handler
 import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
-	"chatbot/cloudResources/tencent"
 	"chatbot/config"
-	"chatbot/utils"
 	"regexp"
 	"strings"
 	"sync"
@@ -142,19 +140,20 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 			}
 		}
 	}()
-	if ctx.EffectiveMessage.Voice != nil {
-		file, err := utils.DownloadFileByFileID(ctx.EditedBusinessMessage.Voice.FileId, b)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to download file")
-		} else {
-			output, err := tencent.GetTencentClient().AudioToText(file)
-			if err != nil {
-				log.Error().Err(err).Msg("failed to get audio text")
-			} else {
-				input += "\n" + output
-			}
-		}
-	}
+	// 语音解析虽然好用，但是太慢了
+	// if ctx.EffectiveMessage.Voice != nil {
+	// 	file, err := utils.DownloadFileByFileID(ctx.EditedBusinessMessage.Voice.FileId, b)
+	// 	if err != nil {
+	// 		log.Error().Err(err).Msg("failed to download file")
+	// 	} else {
+	// 		output, err := tencent.GetTencentClient().AudioToText(file)
+	// 		if err != nil {
+	// 			log.Error().Err(err).Msg("failed to get audio text")
+	// 		} else {
+	// 			input += "\n" + output
+	// 		}
+	// 	}
+	// }
 
 	resp, err := ai.Chat(sender, input)
 	if err != nil {
