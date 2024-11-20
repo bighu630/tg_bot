@@ -12,15 +12,18 @@ path = ""  # 留空表示不记录
 level = 0 # zero log 等级 0是最低
 
 [ytdlp]
+enable = false
 path = "" # default: yt-dlp
 
 [ai]
+enable = false
 geminiKey = ""
 geminiModel = ""
 openaiKey = ""
 openaiModel = ""
 
 [storage]
+enable = false
 provider="sqlite"
 quotations = "./quotations.db"
 

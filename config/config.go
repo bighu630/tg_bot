@@ -38,10 +38,12 @@ type Log struct {
 }
 
 type Ytdlp struct {
-	Path string `json:"path" toml:"path"`
+	Enable bool   `json:"enable" tomel:"enable"`
+	Path   string `json:"path" toml:"path"`
 }
 
 type Ai struct {
+	Enable      bool   `json:"enable" tomel:"enable"`
 	GeminiKey   string `json:"geminiKey" toml:"geminiKey"`
 	GeminiModel string `json:"geminiModel" toml:"geminiModel"`
 	OpenAiKey   string `json:"openaiKey" toml:"openaiKey"`
@@ -50,6 +52,7 @@ type Ai struct {
 
 // StorageConfig storage config
 type StorageConfig struct {
+	Enable     bool         `json:"enable" tomel:"enable"`
 	Provider   string       `mapstructure:"provider" yaml:"provider" toml:"provider"` // 存储类型
 	Quotations string       `mapstructure:"quotations" yaml:"quotations" toml:"quotations"`
 	SqlDB      *SqlDBConfig `mapstructure:"sqlite" yaml:"sqlite" toml:"sqlite"` // sqlDB 配置
