@@ -3,6 +3,7 @@ package handler
 import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
+	"chatbot/cloudResources/tencent"
 	"chatbot/config"
 	"chatbot/utils"
 	"regexp"
@@ -66,9 +67,6 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
 	if ctx.EffectiveChat.Type == "private" || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username) {
-		if ctx.EffectiveMessage.Audio != nil {
-			return handleAudio(ctx.EffectiveMessage.Audio, b, ctx)
-		}
 		return handlePrivateChat(b, ctx, g.ai)
 	} else {
 		sender := ctx.EffectiveSender.Username()
@@ -144,6 +142,19 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 			}
 		}
 	}()
+	if ctx.EffectiveMessage.Voice != nil {
+		file, err := utils.DownloadFileByFileID(ctx.EditedBusinessMessage.Voice.FileId, b)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to download file")
+		} else {
+			output, err := tencent.GetTencentClient().AudioToText(file)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to get audio text")
+			} else {
+				input += "\n" + output
+			}
+		}
+	}
 
 	resp, err := ai.Chat(sender, input)
 	if err != nil {
@@ -154,15 +165,6 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 	log.Debug().Msgf("%s say: %s", sender, input)
 	a <- struct{}{}
 	return sendRespond(resp, b, ctx)
-}
-
-func handleAudio(a *gotgbot.Audio, b *gotgbot.Bot, ctx *ext.Context) error {
-	utils.DownloadFileByFileID(a.FileId, b)
-	return nil
-}
-
-func downloadFileByFileID(fileID string, b *gotgbot.Bot) {
-
 }
 
 func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
