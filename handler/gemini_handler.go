@@ -55,6 +55,7 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 				return false
 			}
 		}
+		return true
 	}
 	msg := ctx.EffectiveMessage.Text
 	if _, ok := quotationsKey[msg]; ok {
