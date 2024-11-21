@@ -43,14 +43,17 @@ func (g *geminiHandler) Name() string {
 }
 
 func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	// youtube music handler
 	if ctx.EffectiveChat.Type == "private" {
-		if !strings.Contains(ctx.EffectiveMessage.Text, "music.youtube") {
-			return true
+		if strings.Contains(ctx.EffectiveMessage.Text, "music.youtube") {
+			return false
 		}
 		if len(ctx.EffectiveMessage.Text) == 11 {
 			// 使用正则表达式 ^[a-zA-Z0-9]+$ 来匹配只包含字母和数字的字符串
 			regex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
-			return !regex.MatchString(ctx.EffectiveMessage.Text)
+			if regex.MatchString(ctx.EffectiveMessage.Text) {
+				return false
+			}
 		}
 	}
 	msg := ctx.EffectiveMessage.Text
@@ -136,7 +139,7 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 				return
 			default:
 				b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
-				time.Sleep(7 * time.Second)
+				time.Sleep(6 * time.Second)
 			}
 		}
 	}()

@@ -16,7 +16,6 @@ func Start() {
 	log.Init(config.GlobalConfig.Log)
 	dao.Init(config.GlobalConfig.Storage.Quotations)
 	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
-	// tgAutoCall := connect.NewAutoCaller(&config.GlobalConfig.WebHookConfig)
 	tencent.NewTencentClient(config.GlobalConfig.TencentConfig)
 
 	var ymbHandler ext.Handler
@@ -33,8 +32,8 @@ func Start() {
 	}
 
 	// audioHandler := handler.NewAudioHandler()
-	timer := timekeeping.NewTimekeeper()
 	// tgWebHook.RegisterHandler(audioHandler)
+	timer := timekeeping.NewTimekeeper()
 
 	tgWebHook.RegisterHandler(gaiHandler)
 	tgWebHook.RegisterHandler(ymbHandler)
