@@ -163,6 +163,7 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 	if err != nil {
 		log.Error().Err(err).Msg("gemini chat error")
 		ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)
+		a <- struct{}{}
 		return err
 	}
 	log.Debug().Msgf("%s say: %s", sender, input)

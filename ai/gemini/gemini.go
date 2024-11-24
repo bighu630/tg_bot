@@ -104,6 +104,7 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 			result := fmt.Sprint(resp.Candidates[0].Content.Parts[0])
 			if err := g.db.Add(models.NewChat(chatId, false, result)); err != nil {
 				log.Error().Err(err).Msg("failed to add chat record")
+				return "", err
 			}
 			return result, nil
 		}
