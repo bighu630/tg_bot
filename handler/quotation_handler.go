@@ -69,6 +69,7 @@ var quotationsKey = map[string]string{
 	"抱抱~":  情侣,
 	"亲亲~":  情侣,
 	"贴贴~":  情侣,
+ "rua": 情侣,
 }
 
 type quotationsHandler struct {
