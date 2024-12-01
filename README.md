@@ -43,6 +43,8 @@ chatgpt待续...
     youtubeMusic下载：
     
         私聊或者群聊里发送youtubeMusic链接，摘星会下载音乐并唱给你听
+        
+> 摘星是bot的名字：@ytbmusicPlaerBot
 
 另外你们的start是作者最大的动力😀
 
