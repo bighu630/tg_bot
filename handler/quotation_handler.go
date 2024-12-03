@@ -105,7 +105,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		crossR = true
 	}
 	if crossR {
-		return getRandomProbability(0.6)
+		return getRandomProbability(0.7)
 	}
 	return false
 }
