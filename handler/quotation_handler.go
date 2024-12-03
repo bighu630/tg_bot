@@ -16,12 +16,12 @@ var dbPath = "./quotations.db"
 
 // quotations 类型
 const (
-	骂人  = "mata"
-	舔狗  = "tiangou"
-	神经  = "psycho"
-	情侣  = "cp"
-	KFC = "kfc"
-	网易云 = "wyy"
+	insult       = "mata"
+	simp         = "tiangou"
+	anxiety      = "psycho"
+	couple       = "cp"
+	KFC          = "kfc"
+	neteaseCloud = "wyy"
 )
 
 var _ ext.Handler = (*quotationsHandler)(nil)
@@ -34,41 +34,41 @@ var (
 )
 
 var quotationsKey = map[string]string{
-	"骂她":  骂人,
-	"骂他":  骂人,
-	"骂它":  骂人,
-	"骂ta": 骂人,
-	"咬他":  骂人,
-	"咬它":  骂人,
-	"咬她":  骂人,
-	"咬ta": 骂人,
+	"骂她":  insult,
+	"骂他":  insult,
+	"骂它":  insult,
+	"骂ta": insult,
+	"咬他":  insult,
+	"咬它":  insult,
+	"咬她":  insult,
+	"咬ta": insult,
 
-	"舔ta":  舔狗,
-	"舔":    舔狗,
-	"t":    舔狗,
-	"tian": 舔狗,
+	"舔ta":  simp,
+	"舔":    simp,
+	"t":    simp,
+	"tian": simp,
 
-	"有病":   神经,
-	"神经":   神经,
-	"发神经":  神经,
-	"神经病":  神经,
-	"有病吧":  神经,
-	"你有病吧": 神经,
+	"有病":   anxiety,
+	"神经":   anxiety,
+	"发神经":  anxiety,
+	"神经病":  anxiety,
+	"有病吧":  anxiety,
+	"你有病吧": anxiety,
 
-	"爱你":   情侣,
-	"mua":  情侣,
-	"mua~": 情侣,
-	"宝":    情侣,
-	"宝儿":   情侣,
-	"宝儿~":  情侣,
-	"摸摸":   情侣,
-	"抱抱":   情侣,
-	"亲亲":   情侣,
-	"贴贴":   情侣,
-	"摸摸~":  情侣,
-	"抱抱~":  情侣,
-	"亲亲~":  情侣,
-	"贴贴~":  情侣,
+	"爱你":   couple,
+	"mua":  couple,
+	"mua~": couple,
+	"宝":    couple,
+	"宝儿":   couple,
+	"宝儿~":  couple,
+	"摸摸":   couple,
+	"抱抱":   couple,
+	"亲亲":   couple,
+	"贴贴":   couple,
+	"摸摸~":  couple,
+	"抱抱~":  couple,
+	"亲亲~":  couple,
+	"贴贴~":  couple,
 }
 
 type quotationsHandler struct {
@@ -122,10 +122,10 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 		} else {
 			replyer = " @" + replyer + " "
 		}
-		if quotationsKey[ctx.EffectiveMessage.Text] == 神经 {
+		if quotationsKey[ctx.EffectiveMessage.Text] == anxiety {
 			m = strings.ReplaceAll(m, "<name>", replyer)
 		}
-		if quotationsKey[ctx.EffectiveMessage.Text] == 情侣 {
+		if quotationsKey[ctx.EffectiveMessage.Text] == couple {
 			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
 				m = replyer + " " + " 单身狗，略略略"
 			} else {
