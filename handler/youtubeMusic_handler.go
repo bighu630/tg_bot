@@ -67,7 +67,7 @@ func (y *youtubeHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 			}
 		}
 	}()
-	ytdlp := exec.Command(y.ytdlpPath, "-f", "bestvideo[height<=?144]+bestaudio/best", "-x", "--audio-format", "mp3", "-P", uuid, url)
+	ytdlp := exec.Command(y.ytdlpPath, "-f", "ba", "-x", "--audio-format", "mp3", "-P", uuid, url)
 	err := ytdlp.Run()
 	a <- struct{}{}
 	if err != nil {
