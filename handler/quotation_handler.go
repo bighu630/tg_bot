@@ -30,7 +30,7 @@ var (
 	骂   = []string{"骂她", "骂他", "骂它", "咬他", "咬她", "咬ta", "咬它"}
 	舔   = []string{"舔", "tian"}
 	神经病 = []string{"有病", "神经"}
-	cp  = []string{"爱你", "mua", "宝儿", "摸摸", "抱抱", "亲亲", "贴贴"}
+	cp  = []string{"爱你", "mua", "宝", "摸摸", "抱抱", "亲亲", "贴贴","rua"}
 )
 
 var quotationsKey = map[string]string{
