@@ -4,7 +4,6 @@ import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
 	"chatbot/config"
-	"chatbot/utils"
 	"regexp"
 	"strings"
 	"sync"
@@ -173,7 +172,8 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 }
 
 func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
-	resp = utils.EscapeMarkdownChars(resp)
+	resp = strings.ReplaceAll(resp, " **", "- **")
+	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
 	log.Debug().Msgf("gemini say in chat: %s", resp)
 	for i := 0; i < 3; i++ {
 		_, err := ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
