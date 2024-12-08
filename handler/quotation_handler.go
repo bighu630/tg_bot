@@ -30,7 +30,7 @@ var (
 	骂   = []string{"骂她", "骂他", "骂它", "咬他", "咬她", "咬ta", "咬它"}
 	舔   = []string{"舔", "tian"}
 	神经病 = []string{"有病", "神经"}
-	cp  = []string{"爱你", "mua", "宝", "摸摸", "抱抱", "亲亲", "贴贴","rua"}
+	cp  = []string{"爱你", "mua", "宝", "摸摸", "抱抱", "亲亲", "贴贴","rua"} 
 )
 
 var quotationsKey = map[string]string{
@@ -107,6 +107,19 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if crossR {
 		return getRandomProbability(0.75)
 	}
+	for key, _ := range quotationsKey {
+		if strings.HasPrefix(msg, key) {
+			return getRandomProbability(0.5)
+		}
+	}
+	if ctx.Message.ReplyToMessage == nil {
+		ctx.EffectiveMessage.ReplyToMessage = new(gotgbot.Message)
+		if ctx.Message.Sticker != nil {
+			return getRandomProbability(0.3)
+		} else {
+			return getRandomProbability(0.1)
+		}
+	}
 	return false
 }
 
@@ -182,10 +195,11 @@ func getRandomProbability(p float64) bool {
 }
 
 func changeText(ctx *ext.Context) {
-	if ctx.Message.ReplyToMessage == nil {
+	// 如果是贴纸 则概率为 0.3 * 0.3 ,第一个0.3在update里面
+	if ctx.Message.ReplyToMessage == nil { // 前提是msg是空
 		ctx.EffectiveMessage.ReplyToMessage = new(gotgbot.Message)
 		if ctx.Message.Sticker != nil {
-			if getRandomProbability(0.5) {
+			if getRandomProbability(0.3) {
 				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
 				ctx.EffectiveMessage.Text = "神经"
 			} else {
@@ -193,7 +207,7 @@ func changeText(ctx *ext.Context) {
 				ctx.EffectiveMessage.Text = "t"
 			}
 		} else {
-			if getRandomProbability(0.5) {
+			if getRandomProbability(0.1) {
 				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
 				ctx.EffectiveMessage.Text = "神经"
 			} else {
@@ -237,11 +251,10 @@ func changeText(ctx *ext.Context) {
 		} else {
 			ctx.EffectiveMessage.Text = "t"
 		}
-	} else {
-		if getRandomProbability(0.5) {
-			ctx.EffectiveMessage.Text = "神经"
-		} else {
-			ctx.EffectiveMessage.Text = "t"
+	}
+	for key, value := range quotationsKey {
+		if strings.HasPrefix(msg, key) {
+			ctx.EffectiveMessage.Text = value
 		}
 	}
 }
