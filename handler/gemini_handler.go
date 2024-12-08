@@ -4,6 +4,7 @@ import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
 	"chatbot/config"
+	"chatbot/utils"
 	"regexp"
 	"strings"
 	"sync"
@@ -107,8 +108,7 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 
 	resp, err := ai.HandleText(setTake(s))
 	a <- struct{}{}
-	resp = strings.ReplaceAll(resp, "* **", "- **")
-	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
+	resp = utils.EscapeMarkdownChars(resp)
 	if err != nil {
 		s.tokeListYou = append(s.tokeListYou, "nop")
 		log.Error().Err(err).Msg("gemini say error")
@@ -172,8 +172,7 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 }
 
 func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
-	resp = strings.ReplaceAll(resp, "* **", "- **")
-	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
+	resp = utils.EscapeMarkdownChars(resp)
 	log.Debug().Msgf("gemini say in chat: %s", resp)
 	for i := 0; i < 3; i++ {
 		_, err := ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{

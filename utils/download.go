@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/google/uuid"
@@ -100,4 +101,18 @@ func convertOgaToOggOpus(inputFile, outputFile string) error {
 
 	fmt.Printf("File converted successfully to %s\n", outputFile)
 	return nil
+}
+
+func EscapeMarkdownChars(input string) string {
+	// 定义需要转义的特殊字符
+	specialChars := "_*[]()~`>#+-=|{}.!"
+	// 创建一个 Builder 来高效拼接字符串
+	var builder strings.Builder
+	for _, char := range input {
+		if strings.ContainsRune(specialChars, char) {
+			builder.WriteRune('\\') // 添加反斜杠
+		}
+		builder.WriteRune(char) // 添加字符
+	}
+	return builder.String()
 }
