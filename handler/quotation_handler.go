@@ -107,7 +107,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if crossR {
 		return getRandomProbability(0.75)
 	}
-	for key, _ := range quotationsKey {
+	for key := range quotationsKey {
 		if strings.HasPrefix(msg, key) {
 			return getRandomProbability(0.5)
 		}
@@ -115,9 +115,9 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.Message.ReplyToMessage == nil {
 		ctx.EffectiveMessage.ReplyToMessage = new(gotgbot.Message)
 		if ctx.Message.Sticker != nil {
-			return getRandomProbability(0.3)
+			return getRandomProbability(0.05)
 		} else {
-			return getRandomProbability(0.1)
+			return getRandomProbability(0.01)
 		}
 	}
 	return false
@@ -207,7 +207,7 @@ func changeText(ctx *ext.Context) {
 				ctx.EffectiveMessage.Text = "t"
 			}
 		} else {
-			if getRandomProbability(0.1) {
+			if getRandomProbability(0.5) {
 				ctx.EffectiveMessage.ReplyToMessage.From = ctx.EffectiveUser
 				ctx.EffectiveMessage.Text = "神经"
 			} else {
@@ -215,7 +215,6 @@ func changeText(ctx *ext.Context) {
 				ctx.EffectiveMessage.Text = "t"
 			}
 		}
-		return
 	}
 	// 如果是关键词 直接触发
 	msg := ctx.EffectiveMessage.Text
@@ -257,4 +256,8 @@ func changeText(ctx *ext.Context) {
 			ctx.EffectiveMessage.Text = value
 		}
 	}
+	if ctx.EffectiveMessage.Text == "" {
+		ctx.EffectiveMessage.Text = "神经"
+	}
+
 }
