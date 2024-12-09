@@ -111,12 +111,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 			return getRandomProbability(0.5)
 		}
 	}
-
-	if ctx.Message.Sticker != nil {
-		return getRandomProbability(0.01)
-	} else {
-		return getRandomProbability(0.005)
-	}
+	return false
 }
 
 func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -157,12 +152,27 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 	if ctx.Message.ReplyToMessage != nil {
 		relayToid = ctx.Message.ReplyToMessage.MessageId
 	}
+	// 如果引用的是bot的话，并且触发了关键词
+	if ctx.Message.ReplyToMessage.From.Id == b.Id {
+		relayToid = 0
+		if quotationsKey[ctx.EffectiveMessage.Text] == couple {
+			relayToid = ctx.Message.MessageId
+			m = "贴贴😳"
+
+		} else if quotationsKey[ctx.EffectiveMessage.Text] == insult {
+			relayToid = ctx.Message.MessageId
+			m = "fuck you 💢,I am fuck gone"
+		}
+	}
 	_, err = b.SendMessage(ctx.Message.Chat.Id, m, &gotgbot.SendMessageOpts{
 		ReplyParameters: &gotgbot.ReplyParameters{
 			MessageId: relayToid,
 			ChatId:    ctx.Message.Chat.Id,
 		},
 	})
+
+	// 发送贴纸
+	// _,err = b.SendSticker(ctx.Message.Chat.Id, sticker gotgbot.InputFileOrString, opts *gotgbot.SendStickerOpts)
 	if err != nil {
 		log.Error().Err(err)
 		return err
