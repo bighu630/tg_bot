@@ -111,15 +111,12 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 			return getRandomProbability(0.5)
 		}
 	}
-	if ctx.Message.ReplyToMessage == nil {
-		ctx.EffectiveMessage.ReplyToMessage = new(gotgbot.Message)
-		if ctx.Message.Sticker != nil {
-			return getRandomProbability(0.05)
-		} else {
-			return getRandomProbability(0.01)
-		}
+
+	if ctx.Message.Sticker != nil {
+		return getRandomProbability(0.01)
+	} else {
+		return getRandomProbability(0.005)
 	}
-	return false
 }
 
 func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
