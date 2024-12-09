@@ -96,7 +96,6 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	// 如果是关键词 直接触发
 	for _, i := range 骂 {
 		if strings.Contains(msg, i) {
-			crossR = true
 			return true
 		}
 	}
@@ -108,7 +107,7 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return getRandomProbability(0.75)
 	}
 	for key := range quotationsKey {
-		if strings.HasPrefix(msg, key) {
+		if strings.HasPrefix(msg, key) && len(msg) >= 21 {
 			return getRandomProbability(0.5)
 		}
 	}
@@ -130,16 +129,19 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 	if err != nil {
 		m = "s~b~"
 	} else {
-		replyer := ctx.Message.ReplyToMessage.From.Username
-		if replyer == "" {
-			replyer = ctx.Message.ReplyToMessage.From.FirstName + " " + ctx.Message.ReplyToMessage.From.LastName
-		} else {
-			replyer = " @" + replyer + " "
+		var replyer string
+		if ctx.Message.ReplyToMessage != nil {
+			replyer = ctx.Message.ReplyToMessage.From.Username
+			if replyer == "" {
+				replyer = ctx.Message.ReplyToMessage.From.FirstName + " " + ctx.Message.ReplyToMessage.From.LastName
+			} else {
+				replyer = " @" + replyer + " "
+			}
 		}
 		if quotationsKey[ctx.EffectiveMessage.Text] == anxiety {
 			m = strings.ReplaceAll(m, "<name>", replyer)
 		}
-		if quotationsKey[ctx.EffectiveMessage.Text] == couple {
+		if quotationsKey[ctx.EffectiveMessage.Text] == couple && ctx.Message.ReplyToMessage != nil {
 			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
 				m = replyer + " " + " 单身狗，略略略"
 			} else {
@@ -154,9 +156,13 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 			}
 		}
 	}
+	var relayToid int64
+	if ctx.Message.ReplyToMessage != nil {
+		relayToid = ctx.Message.ReplyToMessage.MessageId
+	}
 	_, err = b.SendMessage(ctx.Message.Chat.Id, m, &gotgbot.SendMessageOpts{
 		ReplyParameters: &gotgbot.ReplyParameters{
-			MessageId: ctx.Message.ReplyToMessage.MessageId,
+			MessageId: relayToid,
 			ChatId:    ctx.Message.Chat.Id,
 		},
 	})
@@ -215,6 +221,9 @@ func changeText(ctx *ext.Context) {
 				ctx.EffectiveMessage.Text = "t"
 			}
 		}
+		if ctx.EffectiveMessage.Text == "" {
+			ctx.EffectiveMessage.Text = "神经"
+		}
 	}
 	// 如果是关键词 直接触发
 	msg := ctx.EffectiveMessage.Text
@@ -243,13 +252,14 @@ func changeText(ctx *ext.Context) {
 		}
 	}
 	if ctx.Message.Sticker != nil {
-		if getRandomProbability(0.4) {
+		if getRandomProbability(0.4) || ctx.Message.ReplyToMessage != nil {
 			ctx.EffectiveMessage.Text = "mua"
 		} else if getRandomProbability(0.3) {
 			ctx.EffectiveMessage.Text = "神经"
 		} else {
 			ctx.EffectiveMessage.Text = "t"
 		}
+		return
 	}
 	for key, value := range quotationsKey {
 		if strings.HasPrefix(msg, key) {
@@ -259,5 +269,4 @@ func changeText(ctx *ext.Context) {
 	if ctx.EffectiveMessage.Text == "" {
 		ctx.EffectiveMessage.Text = "神经"
 	}
-
 }
