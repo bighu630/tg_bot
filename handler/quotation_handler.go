@@ -157,10 +157,26 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 		relayToid = 0
 		if quotationsKey[ctx.EffectiveMessage.Text] == couple {
 			relayToid = ctx.Message.MessageId
+			_, err = b.SendSticker(ctx.Message.Chat.Id,
+				gotgbot.InputFileByID("CAACAgUAAxkBAANJZ1a5fJY5ltKrMN9gx_ZkPZCrRIQAAuwBAALkf3BWCEU5iNMuxVw2BA"),
+				&gotgbot.SendStickerOpts{
+					ReplyParameters: &gotgbot.ReplyParameters{
+						MessageId: relayToid,
+						ChatId:    ctx.Message.Chat.Id,
+					},
+				})
 			m = "贴贴😳"
 
 		} else if quotationsKey[ctx.EffectiveMessage.Text] == insult {
 			relayToid = ctx.Message.MessageId
+			_, err = b.SendSticker(ctx.Message.Chat.Id,
+				gotgbot.InputFileByID("CAACAgUAAxkBAANSZ1a7DTn6K_7vxaeqUhTBu12QMJEAAkACAAK5ghhWDUFfjnjAp1Q2BA"),
+				&gotgbot.SendStickerOpts{
+					ReplyParameters: &gotgbot.ReplyParameters{
+						MessageId: relayToid,
+						ChatId:    ctx.Message.Chat.Id,
+					},
+				})
 			m = "fuck you 💢,I am fuck gone"
 		}
 	}
@@ -172,7 +188,6 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 	})
 
 	// 发送贴纸
-	// _,err = b.SendSticker(ctx.Message.Chat.Id, sticker gotgbot.InputFileOrString, opts *gotgbot.SendStickerOpts)
 	if err != nil {
 		log.Error().Err(err)
 		return err
