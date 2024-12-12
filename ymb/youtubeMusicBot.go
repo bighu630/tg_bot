@@ -41,6 +41,8 @@ func Start() {
 	timer.RegisterCmd(tgWebHook.RegisterHandlerWithCmd)
 	timer.Start()
 
+	tgWebHook.RegisterHandlerWithCmd(handler.NewHelpHandler(), "help")
+
 	// tgAutoCall.Start()
 	tgWebHook.Start()
 }
