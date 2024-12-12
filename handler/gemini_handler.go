@@ -131,6 +131,10 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) error {
 	sender := ctx.EffectiveSender.Username()
 	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
+	if input == "/help" {
+		_, err := b.SendMessage(ctx.EffectiveChat.Id, Help, nil)
+		return err
+	}
 
 	a := make(chan struct{})
 	go func() {
