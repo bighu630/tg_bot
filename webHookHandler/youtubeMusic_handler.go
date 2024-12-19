@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"chatbot/webHookHandler/update"
 	"errors"
 	"os"
 	"os/exec"
@@ -26,6 +27,18 @@ func NewYoutubeHandler(ytdlpPath string) ext.Handler {
 	if ytdlpPath == "" {
 		ytdlpPath = "yt-dlp"
 	}
+	update.GetUpdater().Register(true, Name, func(b *gotgbot.Bot, ctx *ext.Context) bool {
+		msg := ctx.EffectiveMessage.Text
+		if strings.Contains(msg, "music.youtube") {
+			return true
+		}
+		if len(msg) == 11 {
+			// 使用正则表达式 ^[a-zA-Z0-9]+$ 来匹配只包含字母和数字的字符串
+			regex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+			return regex.MatchString(msg)
+		}
+		return false
+	})
 	return &youtubeHandler{ytdlpPath: ytdlpPath}
 }
 
@@ -34,16 +47,7 @@ func (y *youtubeHandler) Name() string {
 }
 
 func (y *youtubeHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	msg := ctx.EffectiveMessage.Text
-	if strings.Contains(msg, "music.youtube") {
-		return true
-	}
-	if len(msg) == 11 {
-		// 使用正则表达式 ^[a-zA-Z0-9]+$ 来匹配只包含字母和数字的字符串
-		regex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
-		return regex.MatchString(msg)
-	}
-	return false
+	return update.GetUpdater().CheckUpdate(y.Name(), b, ctx)
 }
 
 // url demo = https://music.youtube.com/watch?v=s87joFadgXg&list=OLAK5uy_kVpwmyOiQxW6pTRUSauQ_Ms1Jbm9jMBLU v eversion

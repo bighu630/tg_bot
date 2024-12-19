@@ -4,7 +4,8 @@ import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
 	"chatbot/config"
-	"regexp"
+	"chatbot/webHookHandler/update"
+	"context"
 	"strings"
 	"sync"
 	"time"
@@ -14,7 +15,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const takeTimeout = 60 * time.Minute
+// 群聊对话保存一小时
+const chatMsgSaveTime = 60 * time.Minute
 
 var _ ext.Handler = (*geminiHandler)(nil)
 
@@ -34,7 +36,26 @@ type takeInfo struct {
 
 func NewGeminiHandler(cfg config.Ai) ext.Handler {
 	ai := gemini.NewGemini(cfg)
-	gai = &geminiHandler{make(map[string]*takeInfo), ai}
+	gai = &geminiHandler{
+		takeList: make(map[string]*takeInfo),
+		ai: ai}
+	// 如果有其他的handler与这个冲突，当前handler会返回false
+	update.GetUpdater().Register(false, gai.ai.Name(), func(b *gotgbot.Bot,ctx *ext.Context)(bool){
+		// youtube music handler
+		if ctx.EffectiveChat.Type == "private" {
+			return true
+		}
+		if ctx.EffectiveMessage.ReplyToMessage != nil &&
+		ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
+			return true
+		}
+		for _,ent:=range ctx.EffectiveMessage.Entities{
+			if ent.User.Id == b.Id{
+				return true
+			}
+		}
+		return strings.HasPrefix(ctx.EffectiveMessage.Text, "/chat ")
+	})
 	return gai
 }
 
@@ -43,29 +64,9 @@ func (g *geminiHandler) Name() string {
 }
 
 func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	// youtube music handler
-	if ctx.EffectiveChat.Type == "private" {
-		if strings.Contains(ctx.EffectiveMessage.Text, "music.youtube") {
-			return false
-		}
-		if len(ctx.EffectiveMessage.Text) == 11 {
-			// 使用正则表达式 ^[a-zA-Z0-9]+$ 来匹配只包含字母和数字的字符串
-			regex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
-			if regex.MatchString(ctx.EffectiveMessage.Text) {
-				return false
-			}
-		}
-		return true
-	}
-	msg := ctx.EffectiveMessage.Text
-	if _, ok := quotationsKey[msg]; ok {
-		return false
-	}
-	if ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
-		return true
-	}
-	return strings.HasPrefix(ctx.EffectiveMessage.Text, "/chat ")
+	return update.Updater.CheckUpdate(g.Name(), b, ctx)
 }
+
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
 	if ctx.EffectiveChat.Type == "private" || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username) {
@@ -81,22 +82,13 @@ func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 
 func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *takeInfo) error {
 	sender := ctx.EffectiveSender.Username()
-	a := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-a:
-				return
-			default:
-				b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
-				time.Sleep(7 * time.Second)
-			}
-		}
-	}()
+	c, cancel := context.WithCancel(context.Background())
+	setBotStatusWithContext(c, b, ctx)
+	defer cancel()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.lastTime.Before(time.Now().Add(-takeTimeout)) {
+	if s.lastTime.Before(time.Now().Add(-chatMsgSaveTime)) {
 		s.tokeListMe = []string{}
 		s.tokeListYou = []string{}
 	}
@@ -105,10 +97,8 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	log.Debug().Msgf("%s say: %s", sender, input)
 	s.tokeListMe = append(s.tokeListMe, input)
 
-	resp, err := ai.HandleText(setTake(s))
-	a <- struct{}{}
-	resp = strings.ReplaceAll(resp, " **", "- **")
-	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
+	resp, err := ai.HandleText(buildGroupChat(s))
+	resp = formatAiResp(resp)
 	if err != nil {
 		s.tokeListYou = append(s.tokeListYou, "nop")
 		log.Error().Err(err).Msg("gemini say error")
@@ -128,6 +118,7 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	return nil
 }
 
+// 处理私聊对话
 func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) error {
 	sender := ctx.EffectiveSender.Username()
 	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
@@ -135,49 +126,22 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, Help, nil)
 		return err
 	}
-
-	a := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-a:
-				return
-			default:
-				b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
-				time.Sleep(6 * time.Second)
-			}
-		}
-	}()
-	// 语音解析虽然好用，但是太慢了
-	// if ctx.EffectiveMessage.Voice != nil {
-	// 	file, err := utils.DownloadFileByFileID(ctx.EditedBusinessMessage.Voice.FileId, b)
-	// 	if err != nil {
-	// 		log.Error().Err(err).Msg("failed to download file")
-	// 	} else {
-	// 		output, err := tencent.GetTencentClient().AudioToText(file)
-	// 		if err != nil {
-	// 			log.Error().Err(err).Msg("failed to get audio text")
-	// 		} else {
-	// 			input += "\n" + output
-	// 		}
-	// 	}
-	// }
+	c, cancel := context.WithCancel(context.Background())
+	setBotStatusWithContext(c, b, ctx)
+	defer cancel()
 
 	resp, err := ai.Chat(sender, input)
 	if err != nil {
 		log.Error().Err(err).Msg("gemini chat error")
 		ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)
-		a <- struct{}{}
 		return err
 	}
 	log.Debug().Msgf("%s say: %s", sender, input)
-	a <- struct{}{}
 	return sendRespond(resp, b, ctx)
 }
 
 func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
-	resp = strings.ReplaceAll(resp, " **", "- **")
-	resp = strings.ReplaceAll(resp, "\n* ", "\n- ")
+	resp = formatAiResp(resp)
 	log.Debug().Msgf("gemini say in chat: %s", resp)
 	for i := 0; i < 3; i++ {
 		_, err := ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
@@ -193,7 +157,7 @@ func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func setTake(g *takeInfo) string {
+func buildGroupChat(g *takeInfo) string {
 	me := g.tokeListMe
 	you := g.tokeListYou
 	if len(you)+1 != len(me) {
@@ -219,9 +183,4 @@ func setTake(g *takeInfo) string {
 		resp = "我说：希望你能过滤我们对话中的“你说”“我说”" + resp
 	}
 	return resp
-
-}
-
-func Response(b *gotgbot.Bot, ctx *ext.Context) error {
-	return gai.HandleUpdate(b, ctx)
 }

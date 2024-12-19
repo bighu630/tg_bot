@@ -2,6 +2,7 @@ package handler
 
 import (
 	"chatbot/dao"
+	"chatbot/webHookHandler/update"
 	"crypto/rand"
 	"database/sql"
 	"math/big"
@@ -77,7 +78,37 @@ type quotationsHandler struct {
 }
 
 func NewQuotationsHandler() ext.Handler {
-	return &quotationsHandler{dao.GetDB()}
+	q := &quotationsHandler{dao.GetDB()}
+	update.GetUpdater().Register(false, q.Name(), func(b *gotgbot.Bot, ctx *ext.Context) bool {
+		if ctx.EffectiveChat.Type == "private" {
+			return false
+		}
+		msg := ctx.EffectiveMessage.Text
+		if len(msg) >= 21 {
+			return false
+		}
+		crossR := false
+		// 如果是关键词 直接触发
+		for _, i := range 骂 {
+			if strings.Contains(msg, i) {
+				return true
+			}
+		}
+
+		if _, ok := quotationsKey[msg]; ok {
+			crossR = true
+		}
+		if crossR {
+			return getRandomProbability(0.75)
+		}
+		for key := range quotationsKey {
+			if strings.HasPrefix(msg, key) && len(msg) >= 21 {
+				return getRandomProbability(0.5)
+			}
+		}
+		return false
+	})
+	return q
 }
 
 func (y *quotationsHandler) Name() string {
@@ -85,33 +116,7 @@ func (y *quotationsHandler) Name() string {
 }
 
 func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	if ctx.EffectiveChat.Type == "private" {
-		return false
-	}
-	msg := ctx.EffectiveMessage.Text
-	if len(msg) >= 21 || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From == &b.User) {
-		return false
-	}
-	crossR := false
-	// 如果是关键词 直接触发
-	for _, i := range 骂 {
-		if strings.Contains(msg, i) {
-			return true
-		}
-	}
-
-	if _, ok := quotationsKey[msg]; ok {
-		crossR = true
-	}
-	if crossR {
-		return getRandomProbability(0.75)
-	}
-	for key := range quotationsKey {
-		if strings.HasPrefix(msg, key) && len(msg) >= 21 {
-			return getRandomProbability(0.5)
-		}
-	}
-	return false
+	return update.GetUpdater().CheckUpdate(y.Name(), b, ctx)
 }
 
 func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {

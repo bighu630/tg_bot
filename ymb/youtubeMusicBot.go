@@ -5,9 +5,9 @@ import (
 	"chatbot/config"
 	"chatbot/connect"
 	"chatbot/dao"
-	"chatbot/handler"
 	"chatbot/log"
 	"chatbot/timekeeping"
+	handler "chatbot/webHookHandler"
 
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )

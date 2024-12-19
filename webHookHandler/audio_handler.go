@@ -3,6 +3,7 @@ package handler
 import (
 	"chatbot/cloudResources/tencent"
 	"chatbot/utils"
+	"chatbot/webHookHandler/update"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -16,6 +17,9 @@ type AudioHandler struct {
 }
 
 func NewAudioHandler() *AudioHandler {
+	update.GetUpdater().Register(true, "audio", func(b *gotgbot.Bot, ctx *ext.Context) bool {
+		return ctx.EffectiveMessage.Voice != nil
+	})
 	return &AudioHandler{tencentClient: tencent.GetTencentClient()}
 }
 
@@ -24,7 +28,7 @@ func (a *AudioHandler) Name() string {
 }
 
 func (a *AudioHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	return ctx.EffectiveMessage.Voice != nil
+	return update.GetUpdater().CheckUpdate(a.Name(), b, ctx)
 }
 
 func (a *AudioHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
