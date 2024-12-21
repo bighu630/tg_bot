@@ -146,6 +146,12 @@ chat:
 		m = "s~b~"
 	} else {
 		var replyer string
+		u1 := ctx.Message.From.Username
+		if u1 == "" {
+			u1 = ctx.Message.From.FirstName + " " + ctx.Message.From.LastName
+		} else {
+			u1 = " @" + u1 + " "
+		}
 		if ctx.Message.ReplyToMessage != nil {
 			replyer = ctx.Message.ReplyToMessage.From.Username
 			if replyer == "" {
@@ -161,17 +167,15 @@ chat:
 			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
 				m = replyer + " " + " 单身狗，略略略"
 			} else {
-				u1 := ctx.Message.From.Username
-				if u1 == "" {
-					u1 = ctx.Message.From.FirstName + " " + ctx.Message.From.LastName
-				} else {
-					u1 = " @" + u1 + " "
-				}
-				m = strings.ReplaceAll(m, "<name1>", u1)
-				m = strings.ReplaceAll(m, "<name2>", replyer)
+				m = strings.ReplaceAll(m, "<name2>", u1)
+				m = strings.ReplaceAll(m, "<name1>", replyer)
 			}
 		}
+		m = strings.ReplaceAll(m, "<name>", u1)
+		m = strings.ReplaceAll(m, "<name2>", u1)
+		m = strings.ReplaceAll(m, "<name1>", " @"+b.Username+" ")
 	}
+
 	var relayToid int64
 	if ctx.Message.ReplyToMessage != nil {
 		relayToid = ctx.Message.ReplyToMessage.MessageId
