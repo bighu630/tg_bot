@@ -22,7 +22,7 @@ type autoCallerConnect struct {
 	startAble  bool
 }
 
-func NewAutoCaller(whConfig *config.WebHookConfig) *autoCallerConnect {
+func NewAutoCaller(whConfig config.WebHookConfig) *autoCallerConnect {
 
 	var (
 		token   = whConfig.Token

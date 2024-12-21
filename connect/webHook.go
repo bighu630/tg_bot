@@ -24,7 +24,7 @@ type webHookConnect struct {
 }
 
 // create webHook
-func NewWebHookConnect(whConfig *config.WebHookConfig) *webHookConnect {
+func NewWebHookConnect(whConfig config.WebHookConfig) *webHookConnect {
 	var (
 		token   = whConfig.Token
 		address = whConfig.Address

@@ -15,7 +15,7 @@ import (
 func Start() {
 	log.Init(config.GlobalConfig.Log)
 	dao.Init(config.GlobalConfig.Storage.Quotations)
-	tgWebHook := connect.NewWebHookConnect(&config.GlobalConfig.WebHookConfig)
+	tgWebHook := connect.NewWebHookConnect(config.GlobalConfig.WebHookConfig)
 	tencent.NewTencentClient(config.GlobalConfig.TencentConfig)
 
 	var ymbHandler ext.Handler

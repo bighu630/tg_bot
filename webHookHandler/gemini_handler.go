@@ -38,19 +38,19 @@ func NewGeminiHandler(cfg config.Ai) ext.Handler {
 	ai := gemini.NewGemini(cfg)
 	gai = &geminiHandler{
 		takeList: make(map[string]*takeInfo),
-		ai: ai}
+		ai:       ai}
 	// 如果有其他的handler与这个冲突，当前handler会返回false
-	update.GetUpdater().Register(false, gai.ai.Name(), func(b *gotgbot.Bot,ctx *ext.Context)(bool){
+	update.GetUpdater().Register(false, gai.ai.Name(), func(b *gotgbot.Bot, ctx *ext.Context) bool {
 		// youtube music handler
 		if ctx.EffectiveChat.Type == "private" {
 			return true
 		}
 		if ctx.EffectiveMessage.ReplyToMessage != nil &&
-		ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
+			ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
 			return true
 		}
-		for _,ent:=range ctx.EffectiveMessage.Entities{
-			if ent.User.Id == b.Id{
+		for _, ent := range ctx.EffectiveMessage.Entities {
+			if ent.Type == "mention" && strings.HasPrefix(ctx.EffectiveMessage.Text, "@"+b.Username+" ") {
 				return true
 			}
 		}
@@ -94,6 +94,7 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	}
 	s.lastTime = time.Now()
 	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
+	input = strings.ReplaceAll(input, "@"+b.Username+" ", "")
 	log.Debug().Msgf("%s say: %s", sender, input)
 	s.tokeListMe = append(s.tokeListMe, input)
 

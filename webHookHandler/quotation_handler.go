@@ -31,7 +31,7 @@ var (
 	骂   = []string{"骂她", "骂他", "骂它", "咬他", "咬她", "咬ta", "咬它"}
 	舔   = []string{"舔", "tian"}
 	神经病 = []string{"有病", "神经"}
-	cp  = []string{"爱你", "mua", "宝", "摸摸", "抱抱", "亲亲", "贴贴","rua"} 
+	cp  = []string{"爱你", "mua", "宝", "摸摸", "抱抱", "亲亲", "贴贴", "rua"}
 )
 
 var quotationsKey = map[string]string{
@@ -79,7 +79,7 @@ type quotationsHandler struct {
 
 func NewQuotationsHandler() ext.Handler {
 	q := &quotationsHandler{dao.GetDB()}
-	update.GetUpdater().Register(false, q.Name(), func(b *gotgbot.Bot, ctx *ext.Context) bool {
+	update.GetUpdater().Register(true, q.Name(), func(b *gotgbot.Bot, ctx *ext.Context) bool {
 		if ctx.EffectiveChat.Type == "private" {
 			return false
 		}
@@ -87,7 +87,6 @@ func NewQuotationsHandler() ext.Handler {
 		if len(msg) >= 21 {
 			return false
 		}
-		crossR := false
 		// 如果是关键词 直接触发
 		for _, i := range 骂 {
 			if strings.Contains(msg, i) {
@@ -96,14 +95,11 @@ func NewQuotationsHandler() ext.Handler {
 		}
 
 		if _, ok := quotationsKey[msg]; ok {
-			crossR = true
-		}
-		if crossR {
-			return getRandomProbability(0.75)
+			return true
 		}
 		for key := range quotationsKey {
 			if strings.HasPrefix(msg, key) && len(msg) >= 21 {
-				return getRandomProbability(0.5)
+				return true
 			}
 		}
 		return false
@@ -121,8 +117,31 @@ func (y *quotationsHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 
 func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get quotations msg")
+	msg := ctx.EffectiveMessage.Text
+	for _, i := range 骂 {
+		if strings.Contains(msg, i) {
+			goto chat // 如果是骂，则跳过检测直接处理
+		}
+	}
+	if _, ok := quotationsKey[msg]; !ok {
+		if getRandomProbability(0.25) {
+			return nil
+		} else {
+			goto chat
+		}
+	}
+	for key := range quotationsKey {
+		if strings.HasPrefix(msg, key) && len(msg) >= 21 {
+			if getRandomProbability(0.5) {
+				return nil
+			} else {
+				goto chat
+			}
+		}
+	}
+chat:
 	changeText(ctx)
-	m, err := y.getOneData(quotationsKey[ctx.EffectiveMessage.Text])
+	m, err := y.getOneData(quotationsKey[msg])
 	if err != nil {
 		m = "s~b~"
 	} else {
@@ -228,7 +247,7 @@ func getRandomProbability(p float64) bool {
 }
 
 func changeText(ctx *ext.Context) {
-	// 如果是贴纸 则概率为 0.3 * 0.3 ,第一个0.3在update里面
+	// 有小概率会回复带有应用的msg
 	if ctx.Message.ReplyToMessage == nil { // 前提是msg是空
 		ctx.EffectiveMessage.ReplyToMessage = new(gotgbot.Message)
 		if ctx.Message.Sticker != nil {

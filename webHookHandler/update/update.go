@@ -31,11 +31,13 @@ func (up *updater) Register(repeatable bool, typ string, checkFun checkUpdate) {
 	if repeatable {
 		// 无论是否存在，都使用新的
 		up.repeatable[typ] = checkFun
+	} else {
+		up.unrepeatable[typ] = checkFun
 	}
 }
 
 // 校验是否需要更新
-func (up *updater) CheckUpdate(typ string, b *gotgbot.Bot, ctx *ext.Context) bool {
+func (up updater) CheckUpdate(typ string, b *gotgbot.Bot, ctx *ext.Context) bool {
 	// 允许重复，则必然会响应
 	if checkFun, ok := up.repeatable[typ]; ok {
 		return checkFun(b, ctx)
@@ -44,15 +46,22 @@ func (up *updater) CheckUpdate(typ string, b *gotgbot.Bot, ctx *ext.Context) boo
 	// 注意：如果两个不允许重复的则两个都不会响应
 	if checkFun, ok := up.unrepeatable[typ]; ok {
 		if checkFun(b, ctx) {
-			for _, v := range up.repeatable {
+			for temptyp, v := range up.repeatable {
+				if temptyp == typ {
+					continue
+				}
+
 				if v(b, ctx) {
 					log.Debug().Msg("当前更新存在冲突，故不更新")
 					return false
 				}
 			}
-			for _, v := range up.unrepeatable {
+			for temptyp, v := range up.unrepeatable {
+				if temptyp == typ {
+					continue
+				}
 				if v(b, ctx) {
-					log.Warn().Msg("当前更新存在冲突，故不更新, 但对方也不会更新")
+					log.Warn().Msgf("当前更新存在冲突，故不更新, 但对方也不会更新,当前type: %s 对方type:%s", typ, temptyp)
 					return false
 				}
 			}

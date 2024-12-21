@@ -10,16 +10,18 @@ import (
 )
 
 func setBotStatusWithContext(ctx context.Context, b *gotgbot.Bot, tgctx *ext.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			b.SendChatAction(tgctx.EffectiveChat.Id, "typing", nil)
-			time.Sleep(7 * time.Second)
-		}
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				b.SendChatAction(tgctx.EffectiveChat.Id, "typing", nil)
+				time.Sleep(7 * time.Second)
+			}
 
-	}
+		}
+	}()
 }
 
 func formatAiResp(str string) string {
