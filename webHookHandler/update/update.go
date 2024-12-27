@@ -27,6 +27,7 @@ func GetUpdater() *updater {
 // typ ：类型标志
 //
 // checkFun : 校验更新用的方法，注意根据type区分，每个typ只保留最后一次注册的checkFun
+// WARN: 谈及update时需要注意是否与其他update冲突
 func (up *updater) Register(repeatable bool, typ string, checkFun checkUpdate) {
 	if repeatable {
 		// 无论是否存在，都使用新的

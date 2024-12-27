@@ -52,16 +52,16 @@ type Ai struct {
 
 // StorageConfig storage config
 type StorageConfig struct {
-	Enable     bool         `json:"enable" tomel:"enable"`
-	Provider   string       `mapstructure:"provider" yaml:"provider" toml:"provider"` // 存储类型
-	Quotations string       `mapstructure:"quotations" yaml:"quotations" toml:"quotations"`
-	SqlDB      *SqlDBConfig `mapstructure:"sqlite" yaml:"sqlite" toml:"sqlite"` // sqlDB 配置
+	Enable   bool         `json:"enable" tomel:"enable"`
+	Provider string       `mapstructure:"provider" yaml:"provider" toml:"provider"` // 存储类型
+	SqlDB    *SqlDBConfig `mapstructure:"sqlite" yaml:"sqlite" toml:"sqlite"`       // sqlDB 配置
 }
 
 // SqlDBConfig SqlDB config
 type SqlDBConfig struct {
-	Path string `mapstructure:"path" yaml:"path" toml:"path"` // 存储路径
-	Name string `mapstructure:"name" yaml:"name" toml:"name"` // 数据库名称
+	Path       string `mapstructure:"path" yaml:"path" toml:"path"` // 存储路径
+	Name       string `mapstructure:"name" yaml:"name" toml:"name"` // 数据库名称
+	Quotations string `mapstructure:"quotations" yaml:"quotations" toml:"quotations"`
 }
 
 func init() {

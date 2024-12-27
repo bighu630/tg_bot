@@ -122,6 +122,22 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 	return "", errors.New("failed to send message to gemini")
 }
 
+func (g *gemini) AddChatMsg(chatId string, userSay string, botSay string) error {
+	var cs *genai.ChatSession
+	var ok bool
+	if cs, ok = g.chats[chatId]; !ok {
+		return nil
+	}
+	cs.History = append(cs.History, &genai.Content{
+		Parts: []genai.Part{genai.Text(userSay)},
+		Role:  "user",
+	}, &genai.Content{
+		Parts: []genai.Part{genai.Text(botSay)},
+		Role:  "model",
+	})
+	return nil
+}
+
 func (g *gemini) Translate(text string) (string, error) {
 	return "", nil
 }

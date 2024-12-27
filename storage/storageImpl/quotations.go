@@ -24,7 +24,9 @@ func InitQuotations() (Quotations, error) {
 	if qute != nil {
 		return qute, nil
 	}
-	db := storage.InitWithConfig(config.SqlDBConfig{Name: "quotations.db", Path: "./data"})
+	db := storage.InitWithConfig(config.SqlDBConfig{
+		Name: config.GlobalConfig.Storage.SqlDB.Quotations,
+		Path: config.GlobalConfig.Storage.SqlDB.Path})
 	if db == nil {
 		log.Error().Msg("failed to init database")
 		return nil, errors.New("failed to init database")
@@ -45,4 +47,10 @@ func (q quotations) GetRandomOne(t string) (string, error) {
 		return "", err
 	}
 	return r.Text, nil
+}
+
+func (q *quotations) GetAllType() ([]string, error) {
+
+	// r := models.Quotation{}
+	return nil, nil
 }
