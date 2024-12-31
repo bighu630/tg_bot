@@ -6,7 +6,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DbPath = "./quotations.db"
+const DbPath = "./data/quotations.db"
 
 var db *sql.DB
 

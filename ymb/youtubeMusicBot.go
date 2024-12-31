@@ -14,7 +14,7 @@ import (
 
 func Start() {
 	log.Init(config.GlobalConfig.Log)
-	dao.Init(config.GlobalConfig.Storage.Quotations)
+	dao.Init("")
 	tgWebHook := connect.NewWebHookConnect(config.GlobalConfig.WebHookConfig)
 	tencent.NewTencentClient(config.GlobalConfig.TencentConfig)
 
