@@ -1,10 +1,9 @@
 package handler
 
 import (
-	"chatbot/dao"
+	"chatbot/storage/storageImpl"
 	"chatbot/webHookHandler/update"
 	"crypto/rand"
-	"database/sql"
 	"math/big"
 	"strings"
 
@@ -74,11 +73,15 @@ var quotationsKey = map[string]string{
 }
 
 type quotationsHandler struct {
-	db *sql.DB
+	quotationDB storageImpl.Quotations
 }
 
 func NewQuotationsHandler() ext.Handler {
-	q := &quotationsHandler{dao.GetDB()}
+	qDB, err := storageImpl.InitQuotations()
+	if err != nil {
+		log.Panic().Err(err)
+	}
+	q := &quotationsHandler{qDB}
 	update.GetUpdater().Register(true, q.Name(), func(b *gotgbot.Bot, ctx *ext.Context) bool {
 		if ctx.EffectiveChat.Type == "private" {
 			return false
@@ -141,7 +144,7 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 	}
 chat:
 	changeText(ctx)
-	m, err := y.getOneData(quotationsKey[msg])
+	m, err := y.quotationDB.GetRandomOne(quotationsKey[msg])
 	if err != nil {
 		m = "s~b~"
 	} else {
@@ -221,18 +224,6 @@ chat:
 		return err
 	}
 	return nil
-}
-
-func (y *quotationsHandler) getOneData(t string) (string, error) {
-	var id int
-	var data string
-	var level string
-	// 获取随机行
-	err := y.db.QueryRow("SELECT * FROM main WHERE level = ? ORDER BY RANDOM() LIMIT 1", t).Scan(&id, &data, &level)
-	if level != t {
-		return "I am fuck gone", nil
-	}
-	return data, err
 }
 
 func getRandomProbability(p float64) bool {

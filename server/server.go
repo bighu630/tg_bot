@@ -1,10 +1,9 @@
-package ymb
+package server
 
 import (
 	"chatbot/cloudResources/tencent"
 	"chatbot/config"
 	"chatbot/connect"
-	"chatbot/dao"
 	"chatbot/log"
 	"chatbot/timekeeping"
 	handler "chatbot/webHookHandler"
@@ -14,7 +13,6 @@ import (
 
 func Start() {
 	log.Init(config.GlobalConfig.Log)
-	dao.Init(config.GlobalConfig.Storage.Quotations)
 	tgWebHook := connect.NewWebHookConnect(config.GlobalConfig.WebHookConfig)
 	tencent.NewTencentClient(config.GlobalConfig.TencentConfig)
 

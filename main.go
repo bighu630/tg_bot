@@ -1,11 +1,11 @@
 package main
 
 import (
-	"chatbot/ymb"
+	"chatbot/server"
 	"fmt"
 )
 
 func main() {
-	fmt.Println("hello youtube music bot")
-	ymb.Start()
+	fmt.Println("hello telegram bot")
+	server.Start()
 }
