@@ -102,7 +102,9 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	s.tokeListMe = append(s.tokeListMe, input)
 
 	resp, err := ai.HandleText(buildGroupChat(s))
-	resp = formatAiResp(resp)
+	// 在format之前打赢resp,看是什么字符导致不能TG的Markdown格式错误
+	log.Debug().Msgf("gemini say: %s", resp)
+	// resp = formatAiResp(resp)
 	if err != nil {
 		s.tokeListYou = append(s.tokeListYou, "nop")
 		log.Error().Err(err).Msg("gemini say error")
@@ -110,7 +112,6 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 		err = nil
 	} else {
 		s.tokeListYou = append(s.tokeListYou, resp)
-		log.Debug().Msgf("gemini say: %s", resp)
 	}
 	_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
 		ParseMode: "Markdown",
