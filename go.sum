@@ -79,6 +79,8 @@ github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovk
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
 github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
+github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
+github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-sqlite3 v1.14.22 h1:2gZY6PC6kBnID23Tichd1K+Z0oS6nE/XwU+Vz/5o4kU=
 github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/natefinch/lumberjack v2.0.0+incompatible h1:4QJd3OLAMgj7ph+yZTuX13Ld4UpgHp07nNdFX7mqFfM=
@@ -102,6 +104,8 @@ github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/asr v1.0.1038 h1:fQTV3Z
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/asr v1.0.1038/go.mod h1:53gCO7c6cJ4znWYkK89ZBlKotENCbFuHx+C0qoqRuA0=
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1038 h1:tB3DLzyQXavvGTI+JUvEcuYh0EtTn1rvh9W6xxFHL38=
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1038/go.mod h1:r5r4xbfxSaeR04b166HGsBa/R4U3SueirEUpXGuw+Q0=
+github.com/vitaliy-art/gorm-zerolog v1.2.0 h1:lMMaDg75EO0Vc4uPkADJBAHSH4r4scvLcj3iuAtHtqA=
+github.com/vitaliy-art/gorm-zerolog v1.2.0/go.mod h1:PBDAGC/O2JYitzl+KdBYLI0gfiM4sheJaUAuxrZaewU=
 go.opencensus.io v0.24.0 h1:y73uSU6J157QMP2kn2r30vwW1A2W2WFwSCGnAVxeaD0=
 go.opencensus.io v0.24.0/go.mod h1:vNK8G9p7aAivkbmorf4v+7Hgx+Zs0yY+0fOtgBfjQKo=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.51.0 h1:A3SayB3rNyt+1S6qpI9mHPkeHTZbD7XILEqWnYZb2l0=

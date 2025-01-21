@@ -11,9 +11,9 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog/log"
+	gormzerolog "github.com/vitaliy-art/gorm-zerolog"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var (
@@ -114,7 +114,7 @@ func ConnectDB(drive string, config *config.SqlDBConfig) (*gorm.DB, error) {
 
 	// Use the existing database connection to initialize GORM
 	DB, err = gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: gormzerolog.NewGormLogger(),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("open database failed")
@@ -217,7 +217,7 @@ func Reconnect(drive string, config *config.SqlDBConfig) error {
 
 	// Use the existing database connection to initialize GORM
 	DB, err = gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: gormzerolog.NewGormLogger(),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("open database failed")
