@@ -104,7 +104,7 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	resp, err := ai.HandleText(buildGroupChat(s))
 	// 在format之前打赢resp,看是什么字符导致不能TG的Markdown格式错误
 	log.Debug().Msgf("gemini say: %s", resp)
-	// resp = formatAiResp(resp)
+	resp = formatAiResp(resp)
 	if err != nil {
 		s.tokeListYou = append(s.tokeListYou, "nop")
 		log.Error().Err(err).Msg("gemini say error")
@@ -118,6 +118,8 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	})
 	if err != nil {
 		log.Error().Err(err)
+		log.Debug().Msg("try to use nil opt send reply(before is Markdown)")
+		_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{})
 		return err
 	}
 	return nil
@@ -154,6 +156,8 @@ func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
 		})
 		if err != nil {
 			log.Error().Err(err)
+			log.Debug().Msg("try to use nil opt send reply(before is Markdown)")
+			_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{})
 			return err
 		} else {
 			return nil
