@@ -112,7 +112,7 @@ func (q *QuotationHandler) addQuotations() handlers.Response {
 			})
 		}
 		inlinKeyboardMarkup.InlineKeyboard = append(inlinKeyboardMarkup.InlineKeyboard, inlinKeyboard)
-		_, err := b.SendMessage(ctx.EffectiveChat.Id, "添加语录，如果语录中包含人名，请使用<user1> <user2> 替换人名", &gotgbot.SendMessageOpts{
+		_, err := b.SendMessage(ctx.EffectiveChat.Id, "添加语录，如果语录中包含人名，请使用<name1> <name2> 替换人名", &gotgbot.SendMessageOpts{
 			ReplyMarkup: inlinKeyboardMarkup,
 		})
 		if err != nil {
