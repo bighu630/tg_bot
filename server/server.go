@@ -31,7 +31,7 @@ func Start() {
 		tgWebHook.RegisterHandler(gaiHandler)
 	}
 	if config.GlobalConfig.Storage.Enable {
-		quotationsHandler = handler.NewQuotationsHandler()
+		quotationsHandler = quotation.NewQuotationsHandler()
 		tgWebHook.RegisterHandler(quotationsHandler)
 	}
 	quotationCtrl, err := quotation.NewQuotationHandler()

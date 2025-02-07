@@ -2,8 +2,11 @@ package quotation
 
 import (
 	"chatbot/storage/storageImpl"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -15,25 +18,35 @@ type quotationType string
 
 const (
 	callbackPrefix               = "quotationCallBack_"
-	mata           quotationType = "骂人语录"
-	cp             quotationType = "cp语录"
-	wenai          quotationType = "文爱语录"
+	mataKey        quotationType = "骂人语录"
+	cpKey          quotationType = "cp语录"
+	wenaiKey       quotationType = "文爱语录"
+
+	refusedKey  = "refused"
+	approvedKey = "approved"
+	qutSplit    = " (|..|)\n"
 )
+
+const adminChatIDPath = "./admin"
 
 var quotationTypeMap = map[quotationType]string{
 	// TODO: 这里与quotation_handler里面的key对应，需要把这两整合到一起去
-	mata:  "mata",
-	cp:    "cp",
-	wenai: "wenai",
+	mataKey:  "mata",
+	cpKey:    "cp",
+	wenaiKey: "wenai",
+}
+
+type msg struct {
+	Type string
+	Data string
 }
 
 type QuotationHandler struct {
 	mu          sync.Mutex
 	users       map[int64]quotationType
+	addQutList  map[int64]msg
+	adminChatID int64
 	quotationDB storageImpl.Quotations
-	// 用一个ID记录添加语录的全流程
-	// 用户不能重复添加
-	// 添加后需要审核
 }
 
 func NewQuotationHandler() (*QuotationHandler, error) {
@@ -42,16 +55,48 @@ func NewQuotationHandler() (*QuotationHandler, error) {
 		log.Error().Err(err).Msg("failed to init quotation database")
 		return nil, err
 	}
+	var sChatID string
+	chatId, err := os.ReadFile("./admin")
+	if err == nil {
+		sChatID = string(chatId)
+	}
+
+	var iChatId int
+	if sChatID != "" {
+		iChatId, err = strconv.Atoi(sChatID)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to convert string to int")
+		}
+
+	}
 
 	return &QuotationHandler{
 		users:       make(map[int64]quotationType),
 		quotationDB: db,
+		addQutList:  make(map[int64]msg),
+		adminChatID: int64(iChatId),
 	}, nil
 }
 
 func (q *QuotationHandler) Register(reg func(handler handlers.Response, cmd string)) {
 	// TODO: 自动注册命令
 	reg(q.addQuotations(), "add")
+	reg(q.initAdmin(), "admin")
+}
+
+func (q *QuotationHandler) initAdmin() handlers.Response {
+
+	return func(b *gotgbot.Bot, ctx *ext.Context) error {
+		if q.adminChatID != 0 {
+			_, err := b.SendMessage(ctx.EffectiveChat.Id, "管理员已经设置,请不要重复设置😳", nil)
+			return err
+		}
+		q.adminChatID = ctx.EffectiveChat.Id
+		err := os.WriteFile(adminChatIDPath, []byte(strconv.FormatInt(q.adminChatID, 10)), 0644)
+		b.SendMessage(ctx.EffectiveChat.Id, "你是管理员了", nil)
+
+		return err
+	}
 }
 
 func (q *QuotationHandler) addQuotations() handlers.Response {
@@ -84,10 +129,24 @@ func (q *QuotationHandler) NewCallbackHander() handlers.CallbackQuery {
 	callbackHandler := func(b *gotgbot.Bot, ctx *ext.Context) error {
 		key := strings.TrimPrefix(ctx.Update.CallbackQuery.Data, callbackPrefix)
 		switch quotationType(key) {
-		case mata:
-			q.users[ctx.CallbackQuery.From.Id] = mata
-		case cp:
-			q.users[ctx.CallbackQuery.From.Id] = cp
+		case mataKey:
+			q.users[ctx.CallbackQuery.From.Id] = mataKey
+		case cpKey:
+			q.users[ctx.CallbackQuery.From.Id] = cpKey
+		case refusedKey:
+			return nil
+		case approvedKey:
+			if ctx.EffectiveChat.Id != q.adminChatID {
+				b.SendMessage(ctx.EffectiveChat.Id, "你不是管理员", nil)
+			}
+			key := ctx.CallbackQuery.Message.GetMessageId()
+			if m, ok := q.addQutList[key]; ok {
+				log.Debug().Str("type", m.Type).Str("data", m.Data).Msg("add quotation")
+				q.quotationDB.AddOne(m.Type, m.Data)
+			} else {
+				log.Error().Msg("failed to get message from addQutList")
+			}
+			return nil
 		default:
 			return nil
 		}
@@ -110,7 +169,6 @@ func (q *QuotationHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 }
 
 func (q *QuotationHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
-
 	//收到语录后发给管理员审核
 	if msg, _ := q.quotationDB.GetOne(ctx.EffectiveMessage.Text); msg == ctx.EffectiveMessage.Text {
 		b.SendMessage(ctx.EffectiveSender.ChatId, "当前语录已存在，不需要重复添加", nil)
@@ -118,5 +176,25 @@ func (q *QuotationHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error 
 	}
 	t := q.users[ctx.EffectiveSender.User.Id]
 	delete(q.users, ctx.EffectiveSender.User.Id)
-	return q.quotationDB.AddOne(quotationTypeMap[t], ctx.EffectiveMessage.Text)
+	inlinKeyboardMarkup := gotgbot.InlineKeyboardMarkup{}
+	inlinKeyboard := []gotgbot.InlineKeyboardButton{}
+	inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
+		Text:         refusedKey,
+		CallbackData: callbackPrefix + refusedKey,
+	})
+	inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
+		Text:         approvedKey,
+		CallbackData: callbackPrefix + approvedKey,
+	})
+	inlinKeyboardMarkup.InlineKeyboard = append(inlinKeyboardMarkup.InlineKeyboard, inlinKeyboard)
+	m, err := b.SendMessage(q.adminChatID, quotationTypeMap[t]+qutSplit+ctx.EffectiveMessage.Text, &gotgbot.SendMessageOpts{
+		ReplyMarkup: inlinKeyboardMarkup,
+	})
+	msgId := m.GetMessageId()
+	q.addQutList[msgId] = msg{quotationTypeMap[t], ctx.EffectiveMessage.Text}
+	go func() {
+		time.Sleep(3 * 24 * time.Hour)
+		delete(q.addQutList, msgId)
+	}()
+	return err
 }

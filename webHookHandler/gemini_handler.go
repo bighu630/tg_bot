@@ -43,10 +43,7 @@ func NewGeminiHandler(cfg config.Ai) ext.Handler {
 	update.GetUpdater().Register(false, gai.ai.Name(), func(b *gotgbot.Bot, ctx *ext.Context) bool {
 		// youtube music handler
 		if ctx.EffectiveChat.Type == "private" {
-			if strings.HasPrefix(ctx.EffectiveMessage.Text, "/") {
-				return false
-			}
-			return true
+			return false // 不接受私聊
 		}
 		if ctx.EffectiveMessage.ReplyToMessage != nil &&
 			ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username {
