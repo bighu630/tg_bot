@@ -141,8 +141,10 @@ func (q *QuotationHandler) NewCallbackHander() handlers.CallbackQuery {
 			}
 			key := ctx.CallbackQuery.Message.GetMessageId()
 			if m, ok := q.addQutList[key]; ok {
+
 				log.Debug().Str("type", m.Type).Str("data", m.Data).Msg("add quotation")
 				q.quotationDB.AddOne(m.Type, m.Data)
+				delete(q.addQutList, key)
 			} else {
 				log.Error().Msg("failed to get message from addQutList")
 			}
