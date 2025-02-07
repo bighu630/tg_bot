@@ -16,7 +16,7 @@ func Init(cfg config.Log) {
 	if cfg.TimeFormat != "" {
 		zerolog.TimeFieldFormat = cfg.TimeFormat
 	}
-	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 	output.FormatLevel = func(i interface{}) string {
 		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
 	}

@@ -14,6 +14,8 @@ var qute *quotations
 
 type Quotations interface {
 	GetRandomOne(t string) (string, error)
+	GetOne(qute string) (string, error)
+	AddOne(t string, text string) error
 }
 
 type quotations struct {
@@ -43,6 +45,27 @@ func InitQuotations() (Quotations, error) {
 func (q quotations) GetRandomOne(t string) (string, error) {
 	r := models.Quotation{}
 	if err := q.db.Where("level = ?", t).Order("RANDOM()").First(&r).Error; err != nil {
+		log.Error().Err(err).Msg("failed to get quotation")
+		return "", err
+	}
+	return r.Text, nil
+}
+
+func (q quotations) AddOne(t string, text string) error {
+	r := &models.Quotation{
+		Text:  text,
+		Level: t,
+	}
+	if err := q.db.Create(r).Error; err != nil {
+		return err
+	}
+	log.Debug().Str(t, text).Msg("success add quotation")
+	return nil
+}
+
+func (q quotations) GetOne(t string) (string, error) {
+	r := models.Quotation{}
+	if err := q.db.Where("text = ?", t).Error; err != nil {
 		log.Error().Err(err).Msg("failed to get quotation")
 		return "", err
 	}

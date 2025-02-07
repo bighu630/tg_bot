@@ -178,9 +178,9 @@ func buildGroupChat(g *takeInfo) string {
 	resp := ""
 	var i = len(me) - 1
 	for ; i >= 0; i-- {
-		resp = "我说：" + me[i] + resp
+		resp = "user：" + me[i] + resp
 		if i > 0 {
-			resp = "你说：" + you[i-1] + resp
+			resp = "model：" + you[i-1] + resp
 		}
 	}
 	if len(g.tokeListMe) > 50 {
@@ -188,8 +188,8 @@ func buildGroupChat(g *takeInfo) string {
 		g.tokeListYou = you[:len(you)-49]
 	}
 	if len(g.tokeListMe) > 5 {
-		resp = "你说：好的我会尽力避免使用‘你说’，‘我说’" + resp
-		resp = "我说：希望你能过滤我们对话中的“你说”“我说”" + resp
+		resp = "model：好的我会尽力避免使用‘user’，‘model’" + resp
+		resp = "user：希望你能过滤我们对话中的“user”,“model”" + resp
 	}
 	return resp
 }

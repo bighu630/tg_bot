@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/rs/zerolog/log"
 )
 
@@ -110,6 +111,25 @@ func NewQuotationsHandler() ext.Handler {
 	return q
 }
 
+func (y *quotationsHandler) addQuotations() handlers.Response {
+	return func(b *gotgbot.Bot, ctx *ext.Context) error {
+		inlinKeyboard := []gotgbot.InlineKeyboardButton{}
+		inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
+			Text:         "骂人语录",
+			CallbackData: "",
+		})
+		inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
+			Text:         "cp语录",
+			CallbackData: "",
+		})
+
+		return nil
+	}
+}
+
+func (y *quotationsHandler) auditQuotations() {
+}
+
 func (y *quotationsHandler) Name() string {
 	return "quotations"
 }
@@ -183,6 +203,7 @@ chat:
 	if ctx.Message.ReplyToMessage != nil {
 		relayToid = ctx.Message.ReplyToMessage.MessageId
 	}
+	// TODO: 这一块需要优化
 	// 如果引用的是bot的话，并且触发了关键词
 	if ctx.Message.ReplyToMessage.From.Id == b.Id {
 		relayToid = 0
