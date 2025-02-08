@@ -20,7 +20,7 @@ const (
 	callbackPrefix               = "quotationCallBack_"
 	mataKey        quotationType = "骂人语录"
 	cpKey          quotationType = "cp语录"
-	wenaiKey       quotationType = "文爱语录"
+	wenaiKey       quotationType = "羞羞语录😳"
 
 	refusedKey  = "refused"
 	approvedKey = "approved"
