@@ -141,12 +141,14 @@ func (q *QuotationHandler) NewCallbackHander() handlers.CallbackQuery {
 			}
 			key := ctx.CallbackQuery.Message.GetMessageId()
 			if m, ok := q.addQutList[key]; ok {
-
 				log.Debug().Str("type", m.Type).Str("data", m.Data).Msg("add quotation")
 				q.quotationDB.AddOne(m.Type, m.Data)
+				b.SendMessage(q.adminChatID, "添加成功", nil)
 				delete(q.addQutList, key)
 			} else {
 				log.Error().Msg("failed to get message from addQutList")
+				b.SendMessage(q.adminChatID, "语录以添加或发起其他问题", nil)
+
 			}
 			return nil
 		default:
