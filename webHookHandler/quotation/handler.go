@@ -200,5 +200,6 @@ func (q *QuotationHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error 
 		time.Sleep(3 * 24 * time.Hour)
 		delete(q.addQutList, msgId)
 	}()
+	ctx.EffectiveMessage.Reply(b, "以添加成功", nil)
 	return err
 }
