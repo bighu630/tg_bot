@@ -187,7 +187,7 @@ chat:
 			m = strings.ReplaceAll(m, "<name>", replyer)
 		}
 		if quotationsKey[ctx.EffectiveMessage.Text] == couple && ctx.Message.ReplyToMessage != nil {
-			if ctx.Message.From.Username == ctx.Message.ReplyToMessage.From.Username {
+			if ctx.Message.From.Id == ctx.Message.ReplyToMessage.From.Id {
 				m = replyer + " " + " 单身狗，略略略"
 			} else {
 				m = strings.ReplaceAll(m, "<name2>", u1)
