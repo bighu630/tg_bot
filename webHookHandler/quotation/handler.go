@@ -17,7 +17,7 @@ import (
 type quotationType string
 
 const (
-	callbackPrefix               = "quotationCallBack_"
+	CallbackPrefix               = "quotationCallBack_"
 	mataKey        quotationType = "骂人语录"
 	cpKey          quotationType = "cp语录"
 	wenaiKey       quotationType = "羞羞语录😳"
@@ -108,7 +108,7 @@ func (q *QuotationHandler) addQuotations() handlers.Response {
 
 			inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
 				Text:         string(k),
-				CallbackData: callbackPrefix + string(k),
+				CallbackData: CallbackPrefix + string(k),
 			})
 		}
 		inlinKeyboardMarkup.InlineKeyboard = append(inlinKeyboardMarkup.InlineKeyboard, inlinKeyboard)
@@ -124,10 +124,10 @@ func (q *QuotationHandler) addQuotations() handlers.Response {
 
 func (q *QuotationHandler) NewCallbackHander() handlers.CallbackQuery {
 	filter := func(cq *gotgbot.CallbackQuery) bool {
-		return strings.HasPrefix(cq.Data, callbackPrefix)
+		return strings.HasPrefix(cq.Data, CallbackPrefix)
 	}
 	callbackHandler := func(b *gotgbot.Bot, ctx *ext.Context) error {
-		key := strings.TrimPrefix(ctx.Update.CallbackQuery.Data, callbackPrefix)
+		key := strings.TrimPrefix(ctx.Update.CallbackQuery.Data, CallbackPrefix)
 		switch quotationType(key) {
 		case mataKey:
 			q.users[ctx.CallbackQuery.From.Id] = mataKey
@@ -184,11 +184,11 @@ func (q *QuotationHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error 
 	inlinKeyboard := []gotgbot.InlineKeyboardButton{}
 	inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
 		Text:         refusedKey,
-		CallbackData: callbackPrefix + refusedKey,
+		CallbackData: CallbackPrefix + refusedKey,
 	})
 	inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
 		Text:         approvedKey,
-		CallbackData: callbackPrefix + approvedKey,
+		CallbackData: CallbackPrefix + approvedKey,
 	})
 	log.Debug().Str("quotation", ctx.EffectiveMessage.Text).Msg("get an quotation msg,try to send to admin")
 	inlinKeyboardMarkup.InlineKeyboard = append(inlinKeyboardMarkup.InlineKeyboard, inlinKeyboard)

@@ -4,6 +4,7 @@ import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
 	"chatbot/config"
+	"chatbot/webHookHandler/quotation"
 	"chatbot/webHookHandler/update"
 	"context"
 	"strings"
@@ -44,7 +45,7 @@ func NewGeminiHandler(cfg config.Ai) ext.Handler {
 		// youtube music handler
 		if ctx.EffectiveChat.Type == "private" {
 			// 如果引用为空，或者引用的对象不是bot
-			if ctx.EffectiveMessage.Text == "/add" {
+			if ctx.EffectiveMessage.Text == "/add" || strings.HasPrefix(ctx.EffectiveMessage.Text, quotation.CallbackPrefix) {
 				return false
 			}
 			return (ctx.EffectiveMessage.ReplyToMessage == nil || ctx.EffectiveMessage.ReplyToMessage.From.Username != b.Username)
