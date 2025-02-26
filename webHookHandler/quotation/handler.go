@@ -190,6 +190,7 @@ func (q *QuotationHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error 
 		Text:         approvedKey,
 		CallbackData: callbackPrefix + approvedKey,
 	})
+	log.Debug().Str("quotation", ctx.EffectiveMessage.Text).Msg("get an quotation msg,try to send to admin")
 	inlinKeyboardMarkup.InlineKeyboard = append(inlinKeyboardMarkup.InlineKeyboard, inlinKeyboard)
 	m, err := b.SendMessage(q.adminChatID, quotationTypeMap[t]+qutSplit+ctx.EffectiveMessage.Text, &gotgbot.SendMessageOpts{
 		ReplyMarkup: inlinKeyboardMarkup,
