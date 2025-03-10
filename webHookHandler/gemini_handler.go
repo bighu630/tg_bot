@@ -44,7 +44,7 @@ func NewGeminiHandler(cfg config.Ai) ext.Handler {
 		// youtube music handler
 		if ctx.EffectiveChat.Type == "private" {
 			// 如果引用为空，或者引用的对象不是bot
-			if ctx.EffectiveMessage.Text == "/add" || ctx.CallbackQuery != nil {
+			if strings.HasPrefix(ctx.EffectiveMessage.Text, "/") || ctx.CallbackQuery != nil {
 				return ctx.EffectiveMessage.ReplyToMessage == nil
 			}
 			return (ctx.EffectiveMessage.ReplyToMessage == nil || ctx.EffectiveMessage.ReplyToMessage.From.Username != b.Username)

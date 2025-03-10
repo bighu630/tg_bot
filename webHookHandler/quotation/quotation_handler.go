@@ -9,21 +9,10 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/rs/zerolog/log"
 )
 
 var dbPath = "./quotations.db"
-
-// quotations 类型
-const (
-	insult       = "mata"
-	simp         = "tiangou"
-	anxiety      = "psycho"
-	couple       = "cp"
-	KFC          = "kfc"
-	neteaseCloud = "wyy"
-)
 
 var _ ext.Handler = (*quotationsHandler)(nil)
 
@@ -34,7 +23,7 @@ var (
 	cp  = []string{"爱你", "mua", "宝", "摸摸", "抱抱", "亲亲", "贴贴", "rua"}
 )
 
-var quotationsKey = map[string]string{
+var quotationsKey = map[string]wordType{
 	"骂她":  insult,
 	"骂他":  insult,
 	"骂它":  insult,
@@ -88,6 +77,7 @@ func NewQuotationsHandler() ext.Handler {
 			return false
 		}
 		msg := ctx.EffectiveMessage.Text
+		// 21大概是6个字以内
 		if len(msg) >= 21 {
 			return false
 		}
@@ -110,26 +100,6 @@ func NewQuotationsHandler() ext.Handler {
 	})
 	return q
 }
-
-func (y *quotationsHandler) addQuotations() handlers.Response {
-	return func(b *gotgbot.Bot, ctx *ext.Context) error {
-		inlinKeyboard := []gotgbot.InlineKeyboardButton{}
-		inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
-			Text:         "骂人语录",
-			CallbackData: "",
-		})
-		inlinKeyboard = append(inlinKeyboard, gotgbot.InlineKeyboardButton{
-			Text:         "cp语录",
-			CallbackData: "",
-		})
-
-		return nil
-	}
-}
-
-func (y *quotationsHandler) auditQuotations() {
-}
-
 func (y *quotationsHandler) Name() string {
 	return "quotations"
 }
@@ -164,7 +134,7 @@ func (y *quotationsHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error
 	}
 chat:
 	changeText(ctx)
-	m, err := y.quotationDB.GetRandomOne(quotationsKey[msg])
+	m, err := y.quotationDB.GetRandomOne(string(quotationsKey[msg]))
 	if err != nil {
 		m = "s~b~"
 	} else {
@@ -190,13 +160,13 @@ chat:
 			if ctx.Message.From.Id == ctx.Message.ReplyToMessage.From.Id {
 				m = replyer + " " + " 单身狗，略略略"
 			} else {
-				m = strings.ReplaceAll(m, "<name2>", u1)
-				m = strings.ReplaceAll(m, "<name1>", replyer)
+				m = strings.ReplaceAll(m, "<name1>", u1)
+				m = strings.ReplaceAll(m, "<name2>", replyer)
 			}
 		}
 		m = strings.ReplaceAll(m, "<name>", u1)
-		m = strings.ReplaceAll(m, "<name2>", u1)
-		m = strings.ReplaceAll(m, "<name1>", " @"+b.Username+" ")
+		m = strings.ReplaceAll(m, "<name1>", u1)
+		m = strings.ReplaceAll(m, "<name2>", " @"+b.Username+" ")
 	}
 
 	var relayToid int64
@@ -247,6 +217,7 @@ chat:
 	return nil
 }
 
+// p : 概率 <=1
 func getRandomProbability(p float64) bool {
 	q := int64(p * 1000)
 	if q >= 1000 {
@@ -325,7 +296,7 @@ func changeText(ctx *ext.Context) {
 	}
 	for key, value := range quotationsKey {
 		if strings.HasPrefix(msg, key) {
-			ctx.EffectiveMessage.Text = value
+			ctx.EffectiveMessage.Text = string(value)
 		}
 	}
 	if ctx.EffectiveMessage.Text == "" {

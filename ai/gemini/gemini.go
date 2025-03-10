@@ -93,7 +93,7 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 		cs = g.model.StartChat()
 		g.chats[chatId] = cs
 	}
-	if len(cs.History) > 30 {
+	if len(cs.History) > 29 {
 		cs.History = cs.History[len(cs.History)-30:]
 	}
 	if err := g.db.Add(models.NewChat(chatId, true, msg)); err != nil {
