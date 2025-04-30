@@ -52,6 +52,10 @@ func Start() {
 	// help帮助
 	tgWebHook.RegisterHandlerWithCmd(handler.NewHelpHandler(), "help")
 
+	tgVerify := handler.NewTgJoinVerificationHandler()
+	tgWebHook.RegisterHandler(tgVerify)
+	tgWebHook.RegisterHandler(tgVerify.NewCallbackHander())
+
 	// tgAutoCall.Start()
 	tgWebHook.Start()
 }
