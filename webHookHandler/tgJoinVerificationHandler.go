@@ -25,7 +25,7 @@ var blacklist = struct {
 // tgJoinVerificationHandler 处理入群验证
 type tgJoinVerificationHandler struct{}
 
-func NewTgJoinVerificationHandler() ext.Handler {
+func NewTgJoinVerificationHandler() *tgJoinVerificationHandler {
 	return &tgJoinVerificationHandler{}
 }
 
@@ -76,7 +76,7 @@ func handleNewMember(b *gotgbot.Bot, chatID int64, userID int64, username string
 	hash := md5.Sum([]byte(md5Src))
 	md5Hex := hex.EncodeToString(hash[:])
 	options := make(map[string]int, 4)
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		if i == 0 {
 			options[md5Hex[0:8]] = i
 		} else if i == 3 {
@@ -95,7 +95,6 @@ func handleNewMember(b *gotgbot.Bot, chatID int64, userID int64, username string
 	innerMsg = append(innerMsg, msg.MessageId)
 
 	md5QuescationMsg := fmt.Sprintf("`%s` 的md5 的前8位是", md5Src)
-	// TODO: 包装选项处理请求
 	inlinKeyboardMarkup := gotgbot.InlineKeyboardMarkup{}
 	inlinKeyboard1 := []gotgbot.InlineKeyboardButton{}
 	inlinKeyboard2 := []gotgbot.InlineKeyboardButton{}
