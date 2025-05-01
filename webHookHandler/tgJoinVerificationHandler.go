@@ -58,7 +58,7 @@ func (h *tgJoinVerificationHandler) NewCallbackHander() handlers.CallbackQuery {
 		switch key {
 		case "0":
 			//TODO: 验证成功
-			msg, _ := b.SendMessage(ctx.EffectiveChat.Id, "环境加入聊群", nil)
+			msg, _ := b.SendMessage(ctx.EffectiveChat.Id, "欢迎加入聊群", nil)
 			checkUserCache[ctx.CallbackQuery.From.Id] = struct{}{}
 			time.Sleep(3 * time.Second)
 			b.DeleteMessage(ctx.EffectiveChat.Id, msg.MessageId, nil)
