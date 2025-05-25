@@ -10,8 +10,10 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/rs/zerolog v1.33.0
+	github.com/sashabaranov/go-openai v1.40.0
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/asr v1.0.1038
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1038
+	github.com/vitaliy-art/gorm-zerolog v1.2.0
 	google.golang.org/api v0.186.0
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.11
@@ -34,9 +36,9 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/vitaliy-art/gorm-zerolog v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.51.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0 // indirect

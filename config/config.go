@@ -43,11 +43,12 @@ type Ytdlp struct {
 }
 
 type Ai struct {
-	Enable      bool   `json:"enable" tomel:"enable"`
-	GeminiKey   string `json:"geminiKey" toml:"geminiKey"`
-	GeminiModel string `json:"geminiModel" toml:"geminiModel"`
-	OpenAiKey   string `json:"openaiKey" toml:"openaiKey"`
-	OpenAiModel string `json:"openaiModel" toml:"openaiModel"`
+	Enable        bool   `json:"enable" tomel:"enable"`
+	GeminiKey     string `json:"geminiKey" toml:"geminiKey"`
+	GeminiModel   string `json:"geminiModel" toml:"geminiModel"`
+	OpenAiKey     string `json:"openaiKey" toml:"openaiKey"`
+	OpenAiModel   string `json:"openaiModel" toml:"openaiModel"`
+	OpenAiBaseUrl string `json:"openaiBaseUrl" toml:"openaiBaseUrl"`
 }
 
 // StorageConfig storage config
@@ -70,4 +71,12 @@ func init() {
 		fmt.Println("failed to decode config.toml")
 		return
 	}
+}
+
+func LoadConfig(path string) error {
+	GlobalConfig = new(config)
+	if _, err := toml.DecodeFile(path, GlobalConfig); err != nil {
+		return fmt.Errorf("failed to decode config.toml: %w", err)
+	}
+	return nil
 }

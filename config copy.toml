@@ -21,6 +21,8 @@ geminiKey = ""
 geminiModel = ""
 openaiKey = ""
 openaiModel = ""
+openaiBaseUrl=""
+
 
 [storage]
 enable = false
