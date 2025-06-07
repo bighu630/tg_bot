@@ -5,3 +5,4 @@ demo/
 data/
 .vscode/
 *.log
+.env

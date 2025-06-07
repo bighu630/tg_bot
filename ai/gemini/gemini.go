@@ -99,7 +99,7 @@ func (g *gemini) Chat(chatId string, msg string) (string, error) {
 	if err := g.db.Add(models.NewChat(chatId, true, msg)); err != nil {
 		log.Error().Err(err).Msg("failed to add chat record")
 	}
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		resp, err := cs.SendMessage(g.ctx, genai.Text(msg))
 		if err != nil {
 			log.Error().Err(err).Msg("failed to send message to gemini")
