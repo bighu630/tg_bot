@@ -26,9 +26,14 @@ openaiBaseUrl=""
 
 [storage]
 enable = false
-provider="sqlite"
+provider="mysql"
 
 [storage.sqlite]
 path = "./data"
 name = "bot.om"
 quotations = "quotations.db"
+host = ""
+user = ""
+password = ""
+dbname = ""
+charset = ""

@@ -23,6 +23,11 @@ type webHookConnect struct {
 	domain      string
 }
 
+type webHookUpdate struct {
+	updateType string
+	data       string
+}
+
 // create webHook
 func NewWebHookConnect(whConfig config.WebHookConfig) *webHookConnect {
 	var (

@@ -60,9 +60,16 @@ type StorageConfig struct {
 
 // SqlDBConfig SqlDB config
 type SqlDBConfig struct {
-	Path       string `mapstructure:"path" yaml:"path" toml:"path"` // 存储路径
-	Name       string `mapstructure:"name" yaml:"name" toml:"name"` // 数据库名称
+	Path       string `mapstructure:"path" yaml:"path" toml:"path"` // 存储路径 (for sqlite)
+	Name       string `mapstructure:"name" yaml:"name" toml:"name"` // 数据库名称 (for sqlite)
 	Quotations string `mapstructure:"quotations" yaml:"quotations" toml:"quotations"`
+	// MySQL specific configurations
+	Host     string `mapstructure:"host" yaml:"host" toml:"host"`
+	Port     string `mapstructure:"port" yaml:"port" toml:"port"`
+	User     string `mapstructure:"user" yaml:"user" toml:"user"`
+	Password string `mapstructure:"password" yaml:"password" toml:"password"`
+	DBName   string `mapstructure:"dbname" yaml:"dbname" toml:"dbname"`
+	Charset  string `mapstructure:"charset" yaml:"charset" toml:"charset"`
 }
 
 func init() {

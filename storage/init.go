@@ -9,9 +9,11 @@ import (
 	"path/filepath"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog/log"
 	gormzerolog "github.com/vitaliy-art/gorm-zerolog"
+	"gorm.io/driver/mysql" // Import GORM MySQL driver
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -41,16 +43,11 @@ const (
 func InitWithConfig(cfg config.SqlDBConfig) *gorm.DB {
 	var gormDB *gorm.DB
 	var err error
-	switch DBConfig.Provider {
-	case "sqlite":
-		gormDB, err = ConnectDB(DefaultDriveName, &cfg)
-		if err != nil {
-			panic(fmt.Sprintf("connect database failed:%v", err))
-		}
-		log.Info().Msg("connect database success")
-	default:
-		panic("not supported database type, please check your configuration")
+	gormDB, err = ConnectDB(DBConfig.Provider, &cfg)
+	if err != nil {
+		panic(fmt.Sprintf("connect database failed:%v", err))
 	}
+	log.Info().Msg("connect database success")
 	return gormDB
 }
 
@@ -68,37 +65,88 @@ func InitDB() *gorm.DB {
 			panic(fmt.Sprintf("connect database failed:%v", err))
 		}
 		log.Info().Msg("connect database success")
+	case "mysql":
+		gormDB, err = ConnectDB("mysql", DBConfig.SqlDB)
+		if err != nil {
+			panic(fmt.Sprintf("connect database failed:%v", err))
+		}
+		log.Info().Msg("connect database success")
 	default:
 		panic("not supported database type, please check your configuration")
 	}
 	return gormDB
 }
 
-func ConnectDB(drive string, config *config.SqlDBConfig) (*gorm.DB, error) {
-	// prepare database source
-	if config.Path == "" || config.Name == "" {
-		log.Error().Msg("not configured database path or name yet")
-		return nil, fmt.Errorf("not configured database path or name yet")
-	}
-	if info, err := os.Stat(config.Path); err != nil || !info.IsDir() {
-		err := os.Mkdir(config.Path, 0766)
-		if err != nil {
-			panic(err)
+func ConnectDB(drive string, cfg *config.SqlDBConfig) (*gorm.DB, error) {
+	var db *sql.DB
+	var err error
+	var gormDB *gorm.DB
+
+	switch drive {
+	case "sqlite3":
+		if cfg.Path == "" || cfg.Name == "" {
+			log.Error().Msg("not configured database path or name yet")
+			return nil, fmt.Errorf("not configured database path or name yet")
 		}
+		if info, err := os.Stat(cfg.Path); err != nil || !info.IsDir() {
+			err := os.Mkdir(cfg.Path, 0766)
+			if err != nil {
+				panic(err)
+			}
+		}
+		source := filepath.Join(cfg.Path, cfg.Name)
+		err = CreateSqlFile(source)
+		if err != nil {
+			log.Error().Msg("no database file yet")
+			return nil, fmt.Errorf("no database file yet: %s", source)
+		}
+		db, err = sql.Open("sqlite3", source)
+		if err != nil {
+			log.Error().Err(err).Msg("open sqlite database failed")
+			if db != nil {
+				db.Close()
+			}
+			return nil, err
+		}
+		gormDB, err = gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{
+			Logger: gormzerolog.NewGormLogger(),
+		})
+	case "mysql":
+		if cfg.Host == "" || cfg.Port == "" || cfg.User == "" || cfg.DBName == "" {
+			log.Error().Msg("not configured mysql database connection details yet")
+			return nil, fmt.Errorf("not configured mysql database connection details yet")
+		}
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.Charset)
+		if cfg.Charset == "" {
+			dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+				cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
+		}
+		db, err = sql.Open("mysql", dsn)
+		if err != nil {
+			log.Error().Err(err).Msg("open mysql database failed")
+			if db != nil {
+				db.Close()
+			}
+			return nil, err
+		}
+		gormDB, err = gorm.Open(mysql.New(mysql.Config{
+			Conn: db,
+		}), &gorm.Config{
+			Logger: gormzerolog.NewGormLogger(),
+		})
+	default:
+		return nil, fmt.Errorf("not supported database type: %s", drive)
 	}
-	source := filepath.Join(config.Path, config.Name)
-	err := CreateSqlFile(source)
+
 	if err != nil {
-		log.Error().Msg("no database file yet")
-		return nil, fmt.Errorf("no database file yet: %s", source)
-	}
-	// connect database
-	db, err := sql.Open(drive, source) // 尝试打开数据库连接
-	if err != nil {                    // 检查是否成功打开数据库
-		log.Error().Err(err).Msg("open database failed")
-		db.Close() // 确保函数退出时关闭数据库连接
+		log.Error().Err(err).Msg("gorm open database failed")
+		if db != nil {
+			db.Close()
+		}
 		return nil, err
 	}
+
 	// Set database connection parameters
 	db.SetConnMaxIdleTime(DefaultConnMaxIdleTime)
 	db.SetConnMaxLifetime(DefaultConnMaxLifetime)
@@ -107,21 +155,12 @@ func ConnectDB(drive string, config *config.SqlDBConfig) (*gorm.DB, error) {
 
 	// Check if the database connection is alive
 	if err = db.Ping(); err != nil {
-		log.Error().Msg("open database failed, check your database configuration")
-		db.Close() // 确保函数退出时关闭数据库连接
+		log.Error().Msg("database connection is not alive, check your database configuration")
+		db.Close()
 		return nil, err
 	}
 
-	// Use the existing database connection to initialize GORM
-	DB, err = gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{
-		Logger: gormzerolog.NewGormLogger(),
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("open database failed")
-		db.Close() // 确保函数退出时关闭数据库连接
-		return nil, err
-	}
-	// 开启一个线程检测连接是否存活
+	DB = gormDB
 	go isAlive()
 	return DB, nil
 }
@@ -183,25 +222,69 @@ func randomRetryDelay() time.Duration {
 	return delay
 }
 
-func Reconnect(drive string, config *config.SqlDBConfig) error {
-	// prepare database source
-	if config.Path == "" || config.Name == "" {
-		log.Error().Msg("not configured database path or name yet")
-		return fmt.Errorf("not configured database path or name yet")
+func Reconnect(drive string, cfg *config.SqlDBConfig) error {
+	var db *sql.DB
+	var err error
+
+	switch drive {
+	case "sqlite3":
+		if cfg.Path == "" || cfg.Name == "" {
+			log.Error().Msg("not configured database path or name yet")
+			return fmt.Errorf("not configured database path or name yet")
+		}
+		source := filepath.Join(cfg.Path, cfg.Name)
+		err = CreateSqlFile(source)
+		if err != nil {
+			log.Error().Msg("no database file yet")
+			return fmt.Errorf("no database file yet: %s", source)
+		}
+		db, err = sql.Open("sqlite3", source)
+		if err != nil {
+			log.Error().Err(err).Msg("open sqlite database failed")
+			if db != nil {
+				db.Close()
+			}
+			return err
+		}
+		DB, err = gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{
+			Logger: gormzerolog.NewGormLogger(),
+		})
+	case "mysql":
+		if cfg.Host == "" || cfg.Port == "" || cfg.User == "" || cfg.DBName == "" {
+			log.Error().Msg("not configured mysql database connection details yet")
+			return fmt.Errorf("not configured mysql database connection details yet")
+		}
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.Charset)
+		if cfg.Charset == "" {
+			dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+				cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
+		}
+		db, err = sql.Open("mysql", dsn)
+		if err != nil {
+			log.Error().Err(err).Msg("open mysql database failed")
+			if db != nil {
+				db.Close()
+			}
+			return err
+		}
+		DB, err = gorm.Open(mysql.New(mysql.Config{
+			Conn: db,
+		}), &gorm.Config{
+			Logger: gormzerolog.NewGormLogger(),
+		})
+	default:
+		return fmt.Errorf("not supported database type: %s", drive)
 	}
-	source := filepath.Join(config.Path, config.Name)
-	err := CreateSqlFile(source)
+
 	if err != nil {
-		log.Error().Msg("no database file yet")
-		return fmt.Errorf("no database file yet: %s", source)
-	}
-	// connect database
-	db, err := sql.Open(drive, source) // 尝试打开数据库连接
-	if err != nil {                    // 检查是否成功打开数据库
-		log.Error().Msg("open database failed")
-		db.Close() // 确保函数退出时关闭数据库连接
+		log.Error().Err(err).Msg("gorm open database failed")
+		if db != nil {
+			db.Close()
+		}
 		return err
 	}
+
 	// Set database connection parameters
 	db.SetConnMaxIdleTime(DefaultConnMaxIdleTime)
 	db.SetConnMaxLifetime(DefaultConnMaxLifetime)
@@ -211,17 +294,7 @@ func Reconnect(drive string, config *config.SqlDBConfig) error {
 	// Check if the database connection is alive
 	if err = db.Ping(); err != nil {
 		log.Error().Err(err).Msg("open database failed")
-		db.Close() // 确保函数退出时关闭数据库连接
-		return err
-	}
-
-	// Use the existing database connection to initialize GORM
-	DB, err = gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{
-		Logger: gormzerolog.NewGormLogger(),
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("open database failed")
-		db.Close() // 确保函数退出时关闭数据库连接
+		db.Close()
 		return err
 	}
 	return nil

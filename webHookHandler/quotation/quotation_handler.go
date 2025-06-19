@@ -166,7 +166,7 @@ chat:
 		}
 		m = strings.ReplaceAll(m, "<name>", u1)
 		m = strings.ReplaceAll(m, "<name1>", u1)
-		m = strings.ReplaceAll(m, "<name2>", " @"+b.Username+" ")
+		m = strings.ReplaceAll(m, "<name1>", " @"+b.Username+" ")
 	}
 
 	var relayToid int64
