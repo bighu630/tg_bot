@@ -9,6 +9,16 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	MysqlRand  = "RAND()"
+	SqliteRand = "RANDOM()"
+)
+
+var SQLRANDMAP = map[string]string{
+	"mysql":  MysqlRand,
+	"sqlite": SqliteRand,
+}
+
 var qute *quotations
 
 type Quotations interface {
@@ -45,7 +55,7 @@ func InitQuotations() (Quotations, error) {
 
 func (q quotations) GetRandomOne(t string) (string, error) {
 	r := models.Quotation{}
-	if err := q.db.Where("level = ?", t).Order("RANDOM()").First(&r).Error; err != nil {
+	if err := q.db.Where("level = ?", t).Order(SQLRANDMAP[q.db.Dialector.Name()]).First(&r).Error; err != nil {
 		log.Error().Err(err).Msg("failed to get quotation")
 		return "", err
 	}
