@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,7 +34,50 @@ func (c *client) sendRequest(req *http.Request) (*http.Response, error) {
 	return c.httpClient.Do(req)
 }
 
-func DownloadFileByFileID(fileID string, b *gotgbot.Bot) (*string, error) {
+func DownloadImgByFileID(fileID string, b *gotgbot.Bot) (string, []byte, error) {
+	url := fmt.Sprintf("%s%s/getFile?file_id=%s", baseUrl, b.Token, fileID)
+	filePathReq, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", nil, err
+	}
+	resp, err := cli.sendRequest(filePathReq)
+	if err != nil {
+		return "", nil, err
+	}
+	var data map[string]any
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return "", nil, err
+	}
+	filePath := data["result"].(map[string]any)["file_path"].(string)
+
+	if filePath == "" {
+		return "", nil, errors.New("failed to get file path")
+	}
+	ext := filepath.Ext(filePath) // 得到 ".jpg"
+	if len(ext) > 0 {
+		ext = ext[1:] // 去掉前面的点
+	}
+	url = fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", b.Token, filePath)
+	fileReq, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", nil, err
+	}
+	resp, err = cli.sendRequest(fileReq)
+	if err != nil {
+		return "", nil, err
+	}
+	defer resp.Body.Close()
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, resp.Body)
+	if err != nil {
+		return "", nil, err
+	}
+	imgData := buf.Bytes()
+	return ext, imgData, nil
+}
+
+func DownloadAduioByFileID(fileID string, b *gotgbot.Bot) (*string, error) {
 	url := fmt.Sprintf("%s%s/getFile?file_id=%s", baseUrl, b.Token, fileID)
 	filePathReq, err := http.NewRequest("GET", url, nil)
 	if err != nil {

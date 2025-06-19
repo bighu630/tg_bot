@@ -4,6 +4,7 @@ import (
 	"chatbot/ai"
 	"chatbot/ai/gemini"
 	"chatbot/config"
+	"chatbot/utils"
 	"chatbot/webHookHandler/update"
 	"context"
 	"strings"
@@ -101,8 +102,19 @@ func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *tak
 	input = strings.ReplaceAll(input, "@"+b.Username+" ", "")
 	log.Debug().Msgf("%s say: %s", sender, input)
 	s.tokeListMe = append(s.tokeListMe, input)
+	var imgType string
+	var imgdata []byte
+	var resp string
+	var err error
+	if len(ctx.EffectiveMessage.Photo) > 0 {
+		imgType, imgdata, err = utils.DownloadImgByFileID(ctx.EffectiveMessage.Photo[len(ctx.EffectiveMessage.Photo)-1].FileId, b)
+	}
 
-	resp, err := ai.HandleText(buildGroupChat(s))
+	if len(imgdata) > 0 && imgType != "" {
+		resp, err = ai.HandleTextWithImg(buildGroupChat(s), imgType, imgdata)
+	} else {
+		resp, err = ai.HandleText(buildGroupChat(s))
+	}
 	// 在format之前打赢resp,看是什么字符导致不能TG的Markdown格式错误
 	log.Debug().Msgf("gemini say: %s", resp)
 	resp = formatAiResp(resp)
@@ -138,7 +150,24 @@ func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) erro
 	setBotStatusWithContext(c, b, ctx)
 	defer cancel()
 
-	resp, err := ai.Chat(sender, input)
+	var imgType string
+	var imgdata []byte
+	var resp string
+	var err error
+	if len(ctx.EffectiveMessage.Photo) > 0 {
+		imgType, imgdata, err = utils.DownloadImgByFileID(ctx.EffectiveMessage.Photo[len(ctx.EffectiveMessage.Photo)-1].FileId, b)
+		if err != nil {
+			log.Warn().Err(err).Msg("download img error")
+		} else {
+			log.Info().Str("imgType", imgType).Any("data len", len(imgdata)).Msg("download img success")
+		}
+	}
+
+	if len(imgdata) > 0 && imgType != "" {
+		resp, err = ai.ChatWithImg(sender, input, imgType, imgdata)
+	} else {
+		resp, err = ai.Chat(sender, input)
+	}
 	if err != nil {
 		log.Error().Err(err).Msg("gemini chat error")
 		ctx.EffectiveMessage.Reply(b, "gemini chat error", nil)

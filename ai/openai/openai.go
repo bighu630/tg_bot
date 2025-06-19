@@ -70,6 +70,9 @@ func NewOpenAi(cfg config.Ai) *openAi {
 func (o openAi) Name() string {
 	return "openai"
 }
+func (o *openAi) HandleTextWithImg(msg string, imgType string, imgData []byte) (string, error) {
+	return o.HandleText(msg)
+}
 
 func (o *openAi) HandleText(msg string) (string, error) {
 	resp, err := o.client.CreateCompletion(o.ctx, openai.CompletionRequest{
@@ -83,6 +86,11 @@ func (o *openAi) HandleText(msg string) (string, error) {
 	}
 	result := resp.Choices[0].Text
 	return result, nil
+}
+
+// openAi不支持
+func (o *openAi) ChatWithImg(chatId string, msg string, imgType string, imgData []byte) (string, error) {
+	return o.Chat(chatId, msg)
 }
 
 func (o *openAi) Chat(chatId string, msg string) (string, error) {

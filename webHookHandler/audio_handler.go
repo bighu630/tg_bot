@@ -33,7 +33,7 @@ func (a *AudioHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 
 func (a *AudioHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	if ctx.EffectiveMessage.Voice != nil {
-		audioFile, err := utils.DownloadFileByFileID(ctx.EffectiveMessage.Voice.FileId, b)
+		audioFile, err := utils.DownloadAduioByFileID(ctx.EffectiveMessage.Voice.FileId, b)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to download file")
 			return err
