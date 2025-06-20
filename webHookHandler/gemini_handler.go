@@ -7,6 +7,7 @@ import (
 	"chatbot/utils"
 	"chatbot/webHookHandler/update"
 	"context"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -74,73 +75,18 @@ func (g *geminiHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 
 func (g *geminiHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Debug().Msg("get an chat message")
-	if ctx.EffectiveChat.Type == "private" || (ctx.EffectiveMessage.ReplyToMessage != nil && ctx.EffectiveMessage.ReplyToMessage.From.Username == b.Username) {
-		return handlePrivateChat(b, ctx, g.ai)
-	} else {
-		sender := ctx.EffectiveSender.Username()
-		if _, ok := g.takeList[sender]; !ok {
-			g.takeList[sender] = &takeInfo{sync.Mutex{}, []string{}, []string{}, time.Now()}
-		}
-		return handleGroupChat(b, ctx, g.ai, g.takeList[sender])
-	}
-}
-
-func handleGroupChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface, s *takeInfo) error {
-	sender := ctx.EffectiveSender.Username()
-	c, cancel := context.WithCancel(context.Background())
-	setBotStatusWithContext(c, b, ctx)
-	defer cancel()
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if s.lastTime.Before(time.Now().Add(-chatMsgSaveTime)) {
-		s.tokeListMe = []string{}
-		s.tokeListYou = []string{}
-	}
-	s.lastTime = time.Now()
-	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
-	input = strings.ReplaceAll(input, "@"+b.Username+" ", "")
-	log.Debug().Msgf("%s say: %s", sender, input)
-	s.tokeListMe = append(s.tokeListMe, input)
-	var imgType string
-	var imgdata []byte
-	var resp string
-	var err error
-	if len(ctx.EffectiveMessage.Photo) > 0 {
-		imgType, imgdata, err = utils.DownloadImgByFileID(ctx.EffectiveMessage.Photo[len(ctx.EffectiveMessage.Photo)-1].FileId, b)
-	}
-
-	if len(imgdata) > 0 && imgType != "" {
-		resp, err = ai.HandleTextWithImg(buildGroupChat(s), imgType, imgdata)
-	} else {
-		resp, err = ai.HandleText(buildGroupChat(s))
-	}
-	// 在format之前打赢resp,看是什么字符导致不能TG的Markdown格式错误
-	log.Debug().Msgf("gemini say: %s", resp)
-	resp = formatAiResp(resp)
-	if err != nil {
-		s.tokeListYou = append(s.tokeListYou, "nop")
-		log.Error().Err(err).Msg("gemini say error")
-		resp = "I get something wrong"
-		err = nil
-	} else {
-		s.tokeListYou = append(s.tokeListYou, resp)
-	}
-	_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
-		ParseMode: "Markdown",
-	})
-	if err != nil {
-		log.Error().Err(err)
-		log.Debug().Msg("try to use nil opt send reply(before is Markdown)")
-		_, err = ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{})
-		return err
-	}
-	return nil
+	return handleChat(b, ctx, g.ai)
 }
 
 // 处理私聊对话
-func handlePrivateChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) error {
+func handleChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) error {
 	sender := ctx.EffectiveSender.Username()
+	if ctx.EffectiveChat.Type == "group" || ctx.EffectiveChat.Type == "supergroup" {
+		sender = ctx.EffectiveChat.Title
+		if sender == "" {
+			sender = strconv.Itoa(int(ctx.EffectiveChat.Id))
+		}
+	}
 	input := strings.TrimPrefix(ctx.EffectiveMessage.Text, "/chat ")
 	if input == "/help" {
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, Help, nil)
@@ -194,32 +140,4 @@ func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 	}
 	return nil
-}
-
-func buildGroupChat(g *takeInfo) string {
-	me := g.tokeListMe
-	you := g.tokeListYou
-	if len(you)+1 != len(me) {
-		panic("error input")
-	}
-	if len(me) == 1 {
-		return me[0]
-	}
-	resp := ""
-	var i = len(me) - 1
-	for ; i >= 0; i-- {
-		resp = "user：" + me[i] + resp
-		if i > 0 {
-			resp = "model：" + you[i-1] + resp
-		}
-	}
-	if len(g.tokeListMe) > 50 {
-		g.tokeListMe = me[:len(me)-50]
-		g.tokeListYou = you[:len(you)-49]
-	}
-	if len(g.tokeListMe) > 5 {
-		resp = "model：好的我会尽力避免使用‘user’，‘model’" + resp
-		resp = "user：希望你能过滤我们对话中的“user”,“model”" + resp
-	}
-	return resp
 }
