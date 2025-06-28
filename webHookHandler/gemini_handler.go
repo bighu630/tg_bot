@@ -126,7 +126,7 @@ func handleChat(b *gotgbot.Bot, ctx *ext.Context, ai ai.AiInterface) error {
 func sendRespond(resp string, b *gotgbot.Bot, ctx *ext.Context) error {
 	resp = formatAiResp(resp)
 	log.Debug().Msgf("gemini say in chat: %s", resp)
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		_, err := ctx.EffectiveMessage.Reply(b, resp, &gotgbot.SendMessageOpts{
 			ParseMode: "Markdown",
 		})
